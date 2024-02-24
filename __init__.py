@@ -37,6 +37,11 @@ class Deck:
         cards_count = len(mw.col.find_cards(query))
         return cards_count
 
+    def get_count_cards_introduced_today(self):
+        query = f"deck:{self.name} introduced:1"
+        cards_count = len(mw.col.find_cards(query))
+        return cards_count
+
     def get_count_still_in_queue(self):
         query = f"deck:{self.name} is:due"
         cards_count = len(mw.col.find_cards(query))
@@ -115,7 +120,8 @@ class Manager:
     @staticmethod
     def set_new_cards_count(deck: Deck, deck_config: Config):
         deck_young_count = deck.get_young_count()
-        deck_new_limit = max(1, deck.newLimit - deck_young_count)
+        deck_get_count_cards_introduced_today = deck.get_count_cards_introduced_today()
+        deck_new_limit = max(1, deck.newLimit + deck_get_count_cards_introduced_today - deck_young_count)
         deck_get_count_still_in_queue = deck.get_count_still_in_queue()
         debug_message = f"[{deck_config.name}][{deck.name}] "
         debug_message += f"deck.newLimit {deck.newLimit} | "
