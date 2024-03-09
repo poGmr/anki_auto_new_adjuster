@@ -34,10 +34,11 @@ class Deck:
         cards_count = len(mw.col.find_cards(query))
         return cards_count
 
-    def get_young_count(self):
+    def get_hard_young_count(self):
         query = f'"deck:{self.name}" AND '
         query += f'("is:review" AND -"is:learn") AND '
         query += f'"prop:ivl<21" AND '
+        query += f'"prop:d>0.5" AND '
         query += f'-("is:buried" OR "is:suspended")'
         cards_count = len(mw.col.find_cards(query))
         return cards_count

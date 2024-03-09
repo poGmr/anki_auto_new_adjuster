@@ -43,13 +43,13 @@ class Manager:
         return config_list
 
     def set_new_cards_count(self, deck: Deck, deck_config: Config):
-        deck_young_count = deck.get_young_count()
+        deck_hard_young_count = deck.get_hard_young_count()
         deck_get_count_cards_introduced_today = deck.get_count_cards_introduced_today()
-        deck_new_limit = max(1, deck.newLimit + deck_get_count_cards_introduced_today - deck_young_count)
+        deck_new_limit = max(1, deck.newLimit + deck_get_count_cards_introduced_today - deck_hard_young_count)
         deck_get_count_still_in_queue = deck.get_count_still_in_queue()
         debug_message = f"[{deck_config.name}][{deck.name}] "
         debug_message += f"newLimit {deck.newLimit} | "
-        debug_message += f"young_count {deck_young_count} | "
+        debug_message += f"hard_young_count {deck_hard_young_count} | "
         debug_message += f"new_limit {deck_new_limit} | "
         debug_message += f"get_count_cards_introduced_today {deck_get_count_cards_introduced_today}"
         self.logger.debug(debug_message)
