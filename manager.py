@@ -20,7 +20,7 @@ class Manager:
         for deck in self.decks:
             for config in self.configs:
                 if config.id == deck.configID:
-                    self.set_new_cards_count(deck=deck, deck_config=config)
+                    self.set_new_cards_count_2(deck=deck, deck_config=config)
                     break
 
     def get_decks(self):
@@ -55,5 +55,23 @@ class Manager:
         self.logger.debug(debug_message)
         if deck_get_count_still_in_queue == 0:
             deck_config.set_new_count(new_count=deck_new_limit)
+        else:
+            deck_config.set_new_count(new_count=0)
+
+    def set_new_cards_count_2(self, deck: Deck, deck_config: Config):
+        todays_deck_difficulty_count = round(deck.get_todays_deck_difficulty_count())
+        deck_get_count_cards_introduced_today = deck.get_count_cards_introduced_today()
+        deck_newLimit = deck.newLimit
+        deck_new_config_limit = max(1,
+                                    deck_newLimit - todays_deck_difficulty_count + deck_get_count_cards_introduced_today)
+        deck_get_count_still_in_queue = deck.get_count_still_in_queue()
+        debug_message = f"[{deck_config.name}][{deck.name}] "
+        debug_message += f"deck_newLimit {deck_newLimit} | "
+        debug_message += f"todays_deck_difficulty_count {todays_deck_difficulty_count} | "
+        debug_message += f"deck_get_count_cards_introduced_today {deck_get_count_cards_introduced_today} | "
+        debug_message += f"deck_new_config_limit {deck_new_config_limit}"
+        self.logger.debug(debug_message)
+        if deck_get_count_still_in_queue == 0:
+            deck_config.set_new_count(new_count=deck_new_config_limit)
         else:
             deck_config.set_new_count(new_count=0)

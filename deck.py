@@ -34,6 +34,11 @@ class Deck:
         cards_count = len(mw.col.find_cards(query))
         return cards_count
 
+    def get_todays_cards_ids(self):
+        query = f"deck:{self.name} (is:due OR rated:1)"
+        ids = mw.col.find_cards(query)
+        return ids
+
     def get_hard_young_count(self):
         query = f'"deck:{self.name}" AND '
         query += f'("is:review" AND -"is:learn") AND '
@@ -42,3 +47,33 @@ class Deck:
         query += f'-("is:buried" OR "is:suspended")'
         cards_count = len(mw.col.find_cards(query))
         return cards_count
+
+    def get_cards_difficulty(self, due_days: int = 1):
+        query = f"deck:{self.name} AND prop:due<={due_days}"
+        cards_ids = mw.col.find_cards(query)
+        sum_result = 0
+        n_result = 0
+        for card_id in cards_ids:
+            card_difficulty = self.get_card_difficulty(card_id)
+            card_review_count = self.get_card_review_count(card_id)
+            sum_result += card_difficulty * card_review_count
+            n_result += card_review_count
+        return sum_result / n_result
+
+    def get_card_difficulty(self, card_id: int = 1397074673154) -> float:
+        query = f"SELECT json_extract(data, '$.d') FROM cards WHERE id={card_id}"
+        d = mw.col.db.all(query)[0][0]
+        d = (d - 1) / 9
+        return d
+
+    def get_card_review_count(self, card_id: int = 1397074673154) -> int:
+        query = f"SELECT count() FROM revlog WHERE cid={card_id}"
+        result = mw.col.db.scalar(query)
+        return result
+
+    def get_todays_deck_difficulty_count(self):
+        ids = self.get_todays_cards_ids()
+        difficulty_sum = 0.0
+        for id in ids:
+            difficulty_sum += self.get_card_difficulty(card_id=id)
+        return difficulty_sum
