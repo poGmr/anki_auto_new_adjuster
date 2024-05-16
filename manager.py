@@ -62,7 +62,7 @@ class Manager:
         young_deck_difficulty_sum = round(deck.get_all_young_deck_difficulty_sum())
         deck_get_count_cards_introduced_today = deck.get_count_cards_introduced_today()
         deck_newLimit = deck.newLimit
-        deck_new_config_limit = max(1,
+        deck_new_config_limit = max(0,
                                     deck_newLimit - young_deck_difficulty_sum + deck_get_count_cards_introduced_today)
         deck_get_count_still_in_queue = deck.get_count_still_in_queue()
         debug_message = f"[{deck_config.name}][{deck.name}] "
