@@ -17,11 +17,15 @@ class Manager:
         self.decks: list[Deck] = self.get_decks()
         self.configs = self.get_configs()
 
+        sum__diff = 0
+
         for deck in self.decks:
             for config in self.configs:
                 if config.id == deck.configID:
                     self.set_new_cards_count_2(deck=deck, deck_config=config)
+                    sum__diff += deck.get_todays_all_difficulty()
                     break
+        self.logger.debug(f"Today's sum of difficulty: {sum__diff}")
 
     def get_decks(self):
         decks_list = []
@@ -69,7 +73,8 @@ class Manager:
         debug_message += f"deck_newLimit {deck_newLimit} | "
         debug_message += f"young_deck_difficulty_sum {young_deck_difficulty_sum} | "
         debug_message += f"deck_get_count_cards_introduced_today {deck_get_count_cards_introduced_today} | "
-        debug_message += f"deck_new_config_limit {deck_new_config_limit}"
+        debug_message += f"deck_new_config_limit {deck_new_config_limit} | "
+        debug_message += f"deck.get_todays_all_difficulty(): {round(deck.get_todays_all_difficulty())}"
         self.logger.debug(debug_message)
         if deck_get_count_still_in_queue == 0:
             deck_config.set_new_count(new_count=deck_new_config_limit)

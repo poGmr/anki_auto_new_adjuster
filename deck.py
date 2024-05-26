@@ -92,3 +92,11 @@ class Deck:
         for id in ids:
             difficulty_sum += self.get_card_difficulty(card_id=id)
         return difficulty_sum
+
+    def get_todays_all_difficulty(self):
+        query = f"deck:{self.name} AND rated:1"
+        ids = mw.col.find_cards(query)
+        difficulty_sum = 0.0
+        for id in ids:
+            difficulty_sum += self.get_card_difficulty(card_id=id)
+        return round(difficulty_sum)
