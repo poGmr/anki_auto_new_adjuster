@@ -1,12 +1,13 @@
-import anki.decks
 from aqt import mw
 from collections.abc import Sequence
+import logging
 
 
 class Deck:
-    def __init__(self, raw_data: dict[str, str], new_limit: int) -> None:
+    def __init__(self, raw_data: dict[str, str], young_difficulty_max: int, logger: logging) -> None:
+        self.logger: logging = logger
         self.rawData: dict[str, str] = raw_data
-        self.newLimit: int = new_limit
+        self.young_difficulty_max: int = young_difficulty_max
         self.id = self.rawData["id"]
         self.name = self.rawData["name"]
         self.configID = self.rawData["conf"]
@@ -35,17 +36,19 @@ class Deck:
         d = (d - 1) / 9
         return d
 
-    def get_all_young_deck_difficulty_sum(self) -> float:
+    def get_deck_young_difficulty_sum(self) -> float:
         cards_id = self.get_ids_young_cards()
         difficulty_sum = 0.0
         for card_id in cards_id:
             difficulty_sum += self.get_card_difficulty(card_id=card_id)
         return difficulty_sum
 
-    def get_todays_post_difficulty_sum(self) -> int:
+    def get_todays_again_hit(self):
         query = f"deck:{self.name} AND rated:1"
-        cards_id = mw.col.find_cards(query)
-        difficulty_sum = 0.0
-        for card_id in cards_id:
-            difficulty_sum += self.get_card_difficulty(card_id=card_id)
-        return round(difficulty_sum)
+        all_cards_count = len(mw.col.find_cards(query))
+        query = f"deck:{self.name} AND rated:1:1"
+        all_again_cards_count = len(mw.col.find_cards(query))
+        if all_cards_count != 0:
+            return round(1.0 - (all_again_cards_count / all_cards_count), 2)
+        else:
+            return 0.9
