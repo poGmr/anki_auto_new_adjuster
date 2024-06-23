@@ -5,8 +5,9 @@ import logging
 
 class Config:
     def __init__(self, raw_data: dict[str, dict], logger: logging) -> None:
-        self.raw_data: dict[str, dict] = raw_data
         self.logger: logging = logger
+        self.raw_data: dict[str, dict] = raw_data
+        # self.logger.debug(f"config: {self.raw_data}")
         self.id = self.raw_data["id"]
         self.name = self.raw_data["name"]
 

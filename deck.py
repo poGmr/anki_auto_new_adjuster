@@ -4,13 +4,14 @@ import logging
 
 
 class Deck:
-    def __init__(self, raw_data: dict[str, str], young_difficulty_max: int, logger: logging) -> None:
+    def __init__(self, deck_id: str, young_difficulty_max: int, logger: logging) -> None:
         self.logger: logging = logger
-        self.rawData: dict[str, str] = raw_data
+        self.raw_data: dict[str, str] = mw.col.decks.get(deck_id)
+        # self.logger.debug(f"deck: {self.rawData}")
         self.young_difficulty_max: int = young_difficulty_max
-        self.id: str = str(self.rawData["id"])
-        self.name = self.rawData["name"]
-        self.configID = self.rawData["conf"]
+        self.id: str = str(self.raw_data["id"])
+        self.name = self.raw_data["name"]
+        self.configID = self.raw_data["conf"]
 
     def get_count_cards_introduced_today(self) -> int:
         query = f"deck:{self.name} introduced:1"

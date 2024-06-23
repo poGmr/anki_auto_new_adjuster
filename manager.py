@@ -9,6 +9,8 @@ class Manager:
     def __init__(self, logger: logging) -> None:
         self.logger: logging = logger
         self.add_on_config: dict[str, any] = mw.addonManager.getConfig(__name__)
+        self.raw_decks: list = mw.col.decks.all()
+        self.raw_configs = mw.col.decks.all_config()
         self.update_add_on_config()
         self.decks: set[Deck] = self.get_decks()
         self.configs: set[Config] = self.get_configs()
@@ -29,22 +31,21 @@ class Manager:
         if "decks" not in self.add_on_config:
             self.add_on_config["decks"] = {}
 
-        for deck in mw.col.decks.all():
-            deck_id: str = str(deck["id"])
+        for raw_deck in self.raw_decks:
+            deck_id: str = str(raw_deck["id"])
             if deck_id not in self.add_on_config["decks"]:
                 self.add_on_config["decks"][deck_id] = {}
-                self.add_on_config["decks"][deck_id]["name"] = deck["name"]
+                self.add_on_config["decks"][deck_id]["name"] = raw_deck["name"]
                 self.add_on_config["decks"][deck_id]["enabled"] = False
                 self.add_on_config["decks"][deck_id]["young_max_difficulty"] = 21
                 self.add_on_config["decks"][deck_id]["last_updated"] = 0
 
     def get_decks(self) -> set[Deck]:
         decks_set: set[Deck] = set()
-        raw_decks = mw.col.decks.all()
-        for rawDeck in raw_decks:
-            deck_id: str = str(rawDeck["id"])
+        for raw_deck in self.raw_decks:
+            deck_id: str = str(raw_deck["id"])
             if deck_id in self.add_on_config["decks"] and self.add_on_config["decks"][deck_id]["enabled"]:
-                deck = Deck(raw_data=rawDeck,
+                deck = Deck(deck_id=deck_id,
                             young_difficulty_max=self.add_on_config["decks"][deck_id]["young_max_difficulty"],
                             logger=self.logger)
                 decks_set.add(deck)
@@ -52,10 +53,9 @@ class Manager:
 
     def get_configs(self) -> set[Config]:
         config_set: set[Config] = set()
-        raw_configs = mw.col.decks.all_config()
-        for rawConfig in raw_configs:
-            if rawConfig["id"] != 1:
-                config = Config(rawConfig, self.logger)
+        for raw_config in self.raw_configs:
+            if raw_config["id"] != 1:
+                config = Config(raw_config, self.logger)
                 config_set.add(config)
         return config_set
 
