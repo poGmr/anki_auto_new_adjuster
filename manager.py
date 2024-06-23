@@ -81,13 +81,11 @@ class Manager:
     def set_new_cards_count(self, deck: Deck, deck_config: Config):
         deck_young_difficulty_sum: int = round(deck.get_deck_young_difficulty_sum())
         deck_count_cards_introduced_today: int = deck.get_count_cards_introduced_today()
-
-        deck_get_count_still_in_queue: int = deck.get_count_still_in_queue()
         deck_new_config_limit: int = 0
-        if deck_get_count_still_in_queue == 0:
+        if deck.get_count_still_in_queue() == 0:
             self.set_new_deck_difficulty(deck)
-            deck_new_config_limit: int = max(0,
-                                             deck.young_difficulty_max - deck_young_difficulty_sum + deck_count_cards_introduced_today)
+            deck_new_config_limit = max(0,
+                                        deck.young_difficulty_max - deck_young_difficulty_sum + deck_count_cards_introduced_today)
 
         deck_config.set_new_count(new_count=deck_new_config_limit)
 
