@@ -8,7 +8,7 @@ class Deck:
         self.logger: logging = logger
         self.rawData: dict[str, str] = raw_data
         self.young_difficulty_max: int = young_difficulty_max
-        self.id = self.rawData["id"]
+        self.id: str = str(self.rawData["id"])
         self.name = self.rawData["name"]
         self.configID = self.rawData["conf"]
 
