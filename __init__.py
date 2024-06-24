@@ -14,12 +14,18 @@ logger.addHandler(file_handler)
 logger.setLevel(logging.DEBUG)
 
 
-def sync_did_finish():
+def sync_will_start():
     logger.info("#")
     logger.info("####################################################################################")
     logger.info("#")
+    logger.info("Sync has been requested.")
+
+
+def sync_did_finish():
+    logger.info("Sync has been finished.")
     m1: Manager = Manager(logger)
     m1.update()
 
 
 gui_hooks.sync_did_finish.append(sync_did_finish)
+gui_hooks.sync_will_start.append(sync_will_start)
