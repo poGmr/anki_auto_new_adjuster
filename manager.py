@@ -9,15 +9,19 @@ class Manager:
         self.raw_add_on_config: dict[str, any] = mw.addonManager.getConfig(__name__)
         self.raw_decks: list = mw.col.decks.all()
         self.update_add_on_config()
-        self.decks: set[Deck] = self.get_decks()
+        # self.decks: set[Deck] = self.get_decks()
+        self.decks: dict[str, Deck] = self.get_decks()
 
     def __del__(self) -> None:
         mw.addonManager.writeConfig(__name__, self.raw_add_on_config)
 
     def update(self) -> None:
-        for deck in self.decks:
+        for key in self.decks:
+            deck = self.decks[key]
             deck.set_new_deck_difficulty()
             deck.set_new_cards_count()
+            self.raw_add_on_config["decks"][deck.id]["young_max_difficulty"] = deck.young_difficulty_max
+            self.raw_add_on_config["decks"][deck.id]["last_updated"] = deck.last_updated
 
     def update_add_on_config(self):
         if "decks" not in self.raw_add_on_config:
@@ -32,8 +36,8 @@ class Manager:
                 self.raw_add_on_config["decks"][deck_id]["young_max_difficulty"] = 21
                 self.raw_add_on_config["decks"][deck_id]["last_updated"] = 0
 
-    def get_decks(self) -> set[Deck]:
-        decks_set: set[Deck] = set()
+    def get_decks(self) -> dict[str, Deck]:
+        decks_dict: dict[str, Deck] = {}
         for raw_deck in self.raw_decks:
             deck_id: str = str(raw_deck["id"])
             if deck_id in self.raw_add_on_config["decks"] and self.raw_add_on_config["decks"][deck_id]["enabled"]:
@@ -42,5 +46,5 @@ class Manager:
                 deck = Deck(deck_id=deck_id,
                             young_difficulty_max=young_difficulty_max,
                             logger=self.logger, last_updated=last_updated)
-                decks_set.add(deck)
-        return decks_set
+                decks_dict[deck_id] = deck
+        return dict(sorted(decks_dict.items()))
