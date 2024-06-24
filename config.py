@@ -3,11 +3,11 @@ from aqt import mw
 import logging
 
 
-class Config:
-    def __init__(self, raw_data: dict[str, dict], logger: logging) -> None:
+class DeckConfig:
+    def __init__(self, logger: logging, deck_id: str) -> None:
         self.logger: logging = logger
-        self.raw_data: dict[str, dict] = raw_data
-        # self.logger.debug(f"config: {self.raw_data}")
+        self.deck_id = deck_id
+        self.raw_data = mw.col.decks.config_dict_for_deck_id(deck_id)
         self.id = self.raw_data["id"]
         self.name = self.raw_data["name"]
 

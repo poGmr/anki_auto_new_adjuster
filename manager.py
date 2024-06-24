@@ -1,6 +1,5 @@
 from aqt import mw
 from .deck import Deck
-from .config import Config
 import logging
 from time import time
 

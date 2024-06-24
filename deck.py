@@ -1,7 +1,7 @@
 from aqt import mw
 from collections.abc import Sequence
 import logging
-from .config import Config
+from .config import DeckConfig
 
 
 class Deck:
@@ -11,7 +11,7 @@ class Deck:
         self.young_difficulty_max: int = young_difficulty_max
         self.id: str = str(self.raw_data["id"])
         self.name = self.raw_data["name"]
-        self.deck_config: Config = Config(raw_data=mw.col.decks.config_dict_for_deck_id(deck_id), logger=self.logger)
+        self.deck_config: DeckConfig = DeckConfig(logger=self.logger, deck_id=self.id)
 
     def get_count_cards_introduced_today(self) -> int:
         query = f"deck:{self.name} introduced:1"
