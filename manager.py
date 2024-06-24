@@ -10,10 +10,8 @@ class Manager:
         self.logger: logging = logger
         self.raw_add_on_config: dict[str, any] = mw.addonManager.getConfig(__name__)
         self.raw_decks: list = mw.col.decks.all()
-        self.raw_configs: list = mw.col.decks.all_config()
         self.update_add_on_config()
         self.decks: set[Deck] = self.get_decks()
-        self.configs: set[Config] = self.get_configs()
         self.low_young_difficulty_max = 50
         self.high_young_difficulty_max = 150
 
@@ -22,10 +20,7 @@ class Manager:
 
     def update(self) -> None:
         for deck in self.decks:
-            for config in self.configs:
-                if config.id == deck.configID:
-                    self.set_new_cards_count(deck=deck, deck_config=config)
-                    break
+            self.set_new_cards_count(deck=deck)
 
     def update_add_on_config(self):
         if "decks" not in self.raw_add_on_config:
@@ -51,14 +46,6 @@ class Manager:
                 decks_set.add(deck)
         return decks_set
 
-    def get_configs(self) -> set[Config]:
-        config_set: set[Config] = set()
-        for raw_config in self.raw_configs:
-            if raw_config["id"] != 1:
-                config = Config(raw_config, self.logger)
-                config_set.add(config)
-        return config_set
-
     def set_new_deck_difficulty(self, deck: Deck):
         # self.logger.debug(f"[{deck.name}] young_max_difficulty: {deck.young_max_difficulty}")
         if time() - self.raw_add_on_config["decks"][deck.id]["last_updated"] <= 20 * 60 * 60:
@@ -79,7 +66,7 @@ class Manager:
         deck.young_difficulty_max = current_value
         # self.logger.debug(f"[{deck.name}] New young_max_difficulty: {deck.young_max_difficulty}")
 
-    def set_new_cards_count(self, deck: Deck, deck_config: Config):
+    def set_new_cards_count(self, deck: Deck):
         deck_young_difficulty_sum: int = round(deck.get_deck_young_difficulty_sum())
         deck_count_cards_introduced_today: int = deck.get_count_cards_introduced_today()
         deck_new_config_limit: int = 0
@@ -88,9 +75,9 @@ class Manager:
             deck_new_config_limit = max(0,
                                         deck.young_difficulty_max - deck_young_difficulty_sum + deck_count_cards_introduced_today)
 
-        deck_config.set_new_count(new_count=deck_new_config_limit)
+        deck.deck_config.set_new_count(new_count=deck_new_config_limit)
 
-        debug_message: str = f"[{deck_config.name}][{deck.name}] "
+        debug_message: str = f"[{deck.deck_config.name}][{deck.name}] "
         debug_message += f"deck_young_difficulty_max {deck.young_difficulty_max} | "
         debug_message += f"deck_young_difficulty_sum {deck_young_difficulty_sum} | "
         debug_message += f"deck_count_cards_introduced_today {deck_count_cards_introduced_today}"
