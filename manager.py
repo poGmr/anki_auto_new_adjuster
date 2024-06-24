@@ -8,9 +8,9 @@ from time import time
 class Manager:
     def __init__(self, logger: logging) -> None:
         self.logger: logging = logger
-        self.add_on_config: dict[str, any] = mw.addonManager.getConfig(__name__)
+        self.raw_add_on_config: dict[str, any] = mw.addonManager.getConfig(__name__)
         self.raw_decks: list = mw.col.decks.all()
-        self.raw_configs = mw.col.decks.all_config()
+        self.raw_configs: list = mw.col.decks.all_config()
         self.update_add_on_config()
         self.decks: set[Deck] = self.get_decks()
         self.configs: set[Config] = self.get_configs()
@@ -18,7 +18,7 @@ class Manager:
         self.high_young_difficulty_max = 150
 
     def __del__(self) -> None:
-        mw.addonManager.writeConfig(__name__, self.add_on_config)
+        mw.addonManager.writeConfig(__name__, self.raw_add_on_config)
 
     def update(self) -> None:
         for deck in self.decks:
@@ -28,25 +28,25 @@ class Manager:
                     break
 
     def update_add_on_config(self):
-        if "decks" not in self.add_on_config:
-            self.add_on_config["decks"] = {}
+        if "decks" not in self.raw_add_on_config:
+            self.raw_add_on_config["decks"] = {}
 
         for raw_deck in self.raw_decks:
             deck_id: str = str(raw_deck["id"])
-            if deck_id not in self.add_on_config["decks"]:
-                self.add_on_config["decks"][deck_id] = {}
-                self.add_on_config["decks"][deck_id]["name"] = raw_deck["name"]
-                self.add_on_config["decks"][deck_id]["enabled"] = False
-                self.add_on_config["decks"][deck_id]["young_max_difficulty"] = 21
-                self.add_on_config["decks"][deck_id]["last_updated"] = 0
+            if deck_id not in self.raw_add_on_config["decks"]:
+                self.raw_add_on_config["decks"][deck_id] = {}
+                self.raw_add_on_config["decks"][deck_id]["name"] = raw_deck["name"]
+                self.raw_add_on_config["decks"][deck_id]["enabled"] = False
+                self.raw_add_on_config["decks"][deck_id]["young_max_difficulty"] = 21
+                self.raw_add_on_config["decks"][deck_id]["last_updated"] = 0
 
     def get_decks(self) -> set[Deck]:
         decks_set: set[Deck] = set()
         for raw_deck in self.raw_decks:
             deck_id: str = str(raw_deck["id"])
-            if deck_id in self.add_on_config["decks"] and self.add_on_config["decks"][deck_id]["enabled"]:
+            if deck_id in self.raw_add_on_config["decks"] and self.raw_add_on_config["decks"][deck_id]["enabled"]:
                 deck = Deck(deck_id=deck_id,
-                            young_difficulty_max=self.add_on_config["decks"][deck_id]["young_max_difficulty"],
+                            young_difficulty_max=self.raw_add_on_config["decks"][deck_id]["young_max_difficulty"],
                             logger=self.logger)
                 decks_set.add(deck)
         return decks_set
@@ -61,10 +61,10 @@ class Manager:
 
     def set_new_deck_difficulty(self, deck: Deck):
         # self.logger.debug(f"[{deck.name}] young_max_difficulty: {deck.young_max_difficulty}")
-        if time() - self.add_on_config["decks"][deck.id]["last_updated"] <= 20 * 60 * 60:
+        if time() - self.raw_add_on_config["decks"][deck.id]["last_updated"] <= 20 * 60 * 60:
             # self.logger.debug(f"[{deck.name}] Updated in last 20h - no action is needed.")
             return
-        current_value = self.add_on_config["decks"][deck.id]["young_max_difficulty"]
+        current_value = self.raw_add_on_config["decks"][deck.id]["young_max_difficulty"]
         todays_again_hit = deck.get_todays_again_hit()
         debug_message: str = f"[{deck.name}] Today again hit: {round(todays_again_hit * 100)}% | "
         debug_message += f"current young_difficulty_max: {current_value} | "
@@ -74,8 +74,8 @@ class Manager:
             current_value = max(self.low_young_difficulty_max, current_value - 1)
         debug_message += f"new young_difficulty_max: {current_value}"
         self.logger.debug(debug_message)
-        self.add_on_config["decks"][deck.id]["last_updated"] = int(time())
-        self.add_on_config["decks"][deck.id]["young_max_difficulty"] = current_value
+        self.raw_add_on_config["decks"][deck.id]["last_updated"] = int(time())
+        self.raw_add_on_config["decks"][deck.id]["young_max_difficulty"] = current_value
         deck.young_difficulty_max = current_value
         # self.logger.debug(f"[{deck.name}] New young_max_difficulty: {deck.young_max_difficulty}")
 
