@@ -6,8 +6,8 @@ from time import time
 
 
 class Deck:
-    def __init__(self, deck_id: str, young_difficulty_max: int, logger: logging, last_updated: int) -> None:
-        self.logger: logging = logger
+    def __init__(self, deck_id: str, young_difficulty_max: int, logger: logging.Logger, last_updated: int) -> None:
+        self.logger: logging.Logger = logger
         self.raw_data: dict[str, str] = mw.col.decks.get(deck_id)
         self.young_difficulty_max: int = young_difficulty_max
         self.last_updated = last_updated
@@ -59,35 +59,39 @@ class Deck:
     def adjust_new_cards_count(self):
         if self.get_count_still_in_queue() > 0:
             self.deck_config.set_new_count(new_count=0)
-            self.logger.debug(f"[{self.name}] Cards still in queue - no new cards allowed.")
+            self.logger.info(f"[{self.name}] Cards still in queue - no new cards allowed.")
             return
 
         deck_new_config_limit = self.young_difficulty_max - self.get_deck_young_difficulty_sum() + self.get_count_cards_introduced_today()
         deck_new_config_limit = max(0, deck_new_config_limit)
         self.deck_config.set_new_count(new_count=deck_new_config_limit)
+        self.logger.info(
+            f"[{self.name}] Today's deck difficulty: {self.get_deck_young_difficulty_sum()}. Max allowed difficulty: {self.young_difficulty_max}")
 
     def set_deck_difficulty(self):
         low_young_difficulty_max = 21
         high_young_difficulty_max = 210
-        AGAIN_LOW_FACTOR = 0.85
-        AGAIN_HIGH_FACTOR = 0.95
-
+        AGAIN_LOW_FACTOR = 85
+        AGAIN_HIGH_FACTOR = 95
+        if self.get_count_still_in_queue() > 0:
+            self.logger.info(f"[{self.name}] Cards still in queue - no difficulty change is allowed.")
+            return
         if time() - self.last_updated <= 20 * 60 * 60:
             self.logger.debug(f"[{self.name}] Deck difficulty has been changed in less than 20h.")
             return
-        todays_again_hit = self.get_todays_again_hit()
+        todays_again_hit = round(self.get_todays_again_hit() * 100)
 
         if AGAIN_LOW_FACTOR < todays_again_hit <= AGAIN_HIGH_FACTOR:
             self.logger.debug(
-                f"[{self.name}] Today's again hit: {todays_again_hit}. No need to adjust deck difficulty.")
+                f"[{self.name}] Today's again hit: {todays_again_hit}%. No need to adjust deck difficulty.")
             return
 
         if todays_again_hit >= AGAIN_HIGH_FACTOR:
             self.young_difficulty_max = min(high_young_difficulty_max, self.young_difficulty_max + 1)
             self.logger.info(
-                f"[{self.name}] Today's again hit: {todays_again_hit}. Difficulty increased to {self.young_difficulty_max}.")
+                f"[{self.name}] Today's again hit: {todays_again_hit}%. Difficulty increased to {self.young_difficulty_max}.")
         if todays_again_hit < AGAIN_LOW_FACTOR:
             self.young_difficulty_max = max(low_young_difficulty_max, self.young_difficulty_max - 1)
             self.logger.info(
-                f"[{self.name}] Today's again hit: {todays_again_hit}. Difficulty decreased to {self.young_difficulty_max}.")
+                f"[{self.name}] Today's again hit: {todays_again_hit}%. Difficulty decreased to {self.young_difficulty_max}.")
         self.last_updated = int(time())

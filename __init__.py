@@ -11,7 +11,7 @@ file_handler = RotatingFileHandler(logFilePath, maxBytes=10 * 1024 * 1024, backu
 formatter = logging.Formatter(FORMAT)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 def sync_will_start():

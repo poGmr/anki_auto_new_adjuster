@@ -4,8 +4,8 @@ import logging
 
 
 class Manager:
-    def __init__(self, logger: logging) -> None:
-        self.logger: logging = logger
+    def __init__(self, logger: logging.Logger) -> None:
+        self.logger: logging.Logger = logger
         self.raw_add_on_config: dict[str, any] = mw.addonManager.getConfig(__name__)
         self.update_add_on_config()
         self.decks: dict[str, Deck] = self.get_decks()
