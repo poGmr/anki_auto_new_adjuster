@@ -3,6 +3,7 @@ from collections.abc import Sequence
 import logging
 from .config import DeckConfig
 from time import time
+from datetime import datetime
 
 
 class Deck:
@@ -76,8 +77,10 @@ class Deck:
         if self.get_count_still_in_queue() > 0:
             self.logger.info(f"[{self.name}] Cards still in queue - no difficulty change is allowed.")
             return
-        if time() - self.last_updated <= 20 * 60 * 60:
-            self.logger.debug(f"[{self.name}] Deck difficulty has been changed in less than 20h.")
+        last_updated_date = datetime.fromtimestamp(self.last_updated).date()
+        current_date = datetime.now().date()
+        if last_updated_date == current_date:
+            self.logger.debug(f"[{self.name}] Deck difficulty has been changed today.")
             return
         todays_again_hit = round(self.get_todays_again_hit() * 100)
 
