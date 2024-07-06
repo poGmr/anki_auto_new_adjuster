@@ -7,7 +7,9 @@ class Manager:
     def __init__(self, logger: logging.Logger) -> None:
         self.logger: logging.Logger = logger
         self.raw_add_on_config: dict[str, any] = mw.addonManager.getConfig(__name__)
-        self.update_add_on_config()
+        self.add_new_decks_to_add_on_config()
+        self.update_decks_in_add_on_config()
+        self.remove_old_decks_from_add_on_config()
         self.decks: dict[str, Deck] = self.get_decks()
 
     def __del__(self) -> None:
@@ -21,7 +23,7 @@ class Manager:
             self.raw_add_on_config["decks"][deck.id]["young_max_difficulty"] = deck.young_difficulty_max
             self.raw_add_on_config["decks"][deck.id]["last_updated"] = deck.last_updated
 
-    def update_add_on_config(self):
+    def add_new_decks_to_add_on_config(self):
         if "decks" not in self.raw_add_on_config:
             self.raw_add_on_config["decks"] = {}
 
@@ -33,6 +35,17 @@ class Manager:
                 self.raw_add_on_config["decks"][d_id]["enabled"] = False
                 self.raw_add_on_config["decks"][d_id]["young_max_difficulty"] = 21
                 self.raw_add_on_config["decks"][d_id]["last_updated"] = 0
+
+    def update_decks_in_add_on_config(self):
+        for deck in mw.col.decks.all_names_and_ids():
+            d_id = str(deck.id)
+            if self.raw_add_on_config["decks"][d_id]["name"] != deck.name:
+                self.logger.debug(
+                    f"Deck ID: {d_id} has been renamed from '{self.raw_add_on_config['decks'][d_id]['name']}' to '{deck.name}'")
+                self.raw_add_on_config["decks"][d_id]["name"] = deck.name
+
+    def remove_old_decks_from_add_on_config(self):
+        pass
 
     def get_decks(self) -> dict[str, Deck]:
         decks_dict: dict[str, Deck] = {}
