@@ -60,7 +60,7 @@ class Deck:
     def adjust_new_cards_count(self):
         if self.get_count_still_in_queue() > 0:
             self.deck_config.set_new_count(new_count=0)
-            self.logger.info(f"[{self.name}] Cards still in queue - no new cards allowed.")
+            self.logger.debug(f"[{self.name}] Cards still in queue - no new cards allowed.")
             return
 
         deck_new_config_limit = self.young_difficulty_max - self.get_deck_young_difficulty_sum() + self.get_count_cards_introduced_today()
@@ -75,7 +75,7 @@ class Deck:
         AGAIN_LOW_FACTOR = 85
         AGAIN_HIGH_FACTOR = 95
         if self.get_count_still_in_queue() > 0:
-            self.logger.info(f"[{self.name}] Cards still in queue - no difficulty change is allowed.")
+            self.logger.debug(f"[{self.name}] Cards still in queue - no difficulty change is allowed.")
             return
         last_updated_date = datetime.fromtimestamp(self.last_updated).date()
         current_date = datetime.now().date()
