@@ -14,7 +14,7 @@ def initialize_logger():
         formatter = logging.Formatter(log_format)
         file_handler.setFormatter(formatter)
         result.addHandler(file_handler)
-        result.setLevel(logging.INFO)
+        result.setLevel(logging.DEBUG)
     return result
 
 
