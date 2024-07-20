@@ -12,8 +12,12 @@ class Manager:
     def update(self) -> None:
         for d_id in self.decks:
             deck = self.decks[d_id]
+            if deck.get_count_still_in_queue() > 0:
+                deck.deck_config.set_new_count(new_count=0)
+                self.logger.debug(f"[{deck.name}] Cards still in queue - no action to take.")
+                continue
             deck.set_deck_difficulty()
-            deck.adjust_new_cards_count()
+            deck.set_new_cards_count()
             self.add_on_config.update_deck(d_id, deck.young_difficulty_max, deck.last_updated)
 
     def get_decks(self) -> dict[str, Deck]:
