@@ -12,7 +12,7 @@ class Manager:
     def update(self) -> None:
         for d_id in self.decks:
             deck = self.decks[d_id]
-            if deck.get_count_still_in_queue() > 0:
+            if deck._get_count_still_in_queue() > 0:
                 deck.deck_config.set_new_count(new_count=0)
                 self.logger.debug(f"[{deck.name}] Cards still in queue - no action to take.")
                 continue
