@@ -4,9 +4,9 @@ import logging
 
 
 class Manager:
-    def __init__(self, logger: logging.Logger) -> None:
+    def __init__(self, logger: logging.Logger, add_on_config: AddonConfig) -> None:
         self.logger: logging.Logger = logger
-        self.add_on_config: AddonConfig = AddonConfig(logger)
+        self.add_on_config: AddonConfig = add_on_config
         self.decks: dict[str, Deck] = self.get_decks()
 
     def update(self) -> None:

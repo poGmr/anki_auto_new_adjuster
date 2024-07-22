@@ -71,7 +71,7 @@ class Deck:
 
         todays_again_hit = round(self._get_todays_again_hit() * 100)
         info_log = f"[{self.name}] Today's again hit: {todays_again_hit}%."
-        if todays_again_hit < self.AGAIN_LOW_FACTOR:
+        if todays_again_hit <= self.AGAIN_LOW_FACTOR:
             self.young_difficulty_max = max(self.LOW_YOUNG_DIFFICULTY_MAX, self.young_difficulty_max - 1)
             info_log += f" Difficulty decreased to {self.young_difficulty_max}."
 

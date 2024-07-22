@@ -1,8 +1,11 @@
 from aqt import gui_hooks
+
 import logging
 import os
 from logging.handlers import RotatingFileHandler
 from .manager import Manager
+from .addon_config import AddonConfig
+from .gui import GUI
 
 
 def initialize_logger():
@@ -18,6 +21,15 @@ def initialize_logger():
     return result
 
 
+logger = initialize_logger()
+
+
+def profile_did_open():
+    add_on_config = AddonConfig(logger)
+    gui = GUI(logger, add_on_config)
+    gui_hooks.profile_did_open.append(gui.add_menu_button)
+
+
 def sync_will_start():
     logger.info("#")
     logger.info("####################################################################################")
@@ -27,10 +39,11 @@ def sync_will_start():
 
 def sync_did_finish():
     logger.debug("Sync has been finished.")
-    m1: Manager = Manager(logger)
+    add_on_config = AddonConfig(logger)
+    m1: Manager = Manager(logger, add_on_config)
     m1.update()
 
 
-logger = initialize_logger()
 gui_hooks.sync_did_finish.append(sync_did_finish)
 gui_hooks.sync_will_start.append(sync_will_start)
+gui_hooks.profile_did_open.append(profile_did_open)

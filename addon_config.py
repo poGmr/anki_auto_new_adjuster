@@ -9,16 +9,20 @@ class AddonConfig:
     def __init__(self, logger: logging.Logger):
         self.logger: logging.Logger = logger
         self.raw: Dict[str, Any] = mw.addonManager.getConfig(__name__)
-        self.add_new_decks_to_add_on_config()
-        self.update_decks_in_add_on_config()
-        self.remove_old_decks_from_add_on_config()
+        self._add_new_decks_to_add_on_config()
+        self._update_decks_in_add_on_config()
+        self._remove_old_decks_from_add_on_config()
+        self._save()
         self.logger.debug(f"Addon config loaded and updated: {json.dumps(self.raw, indent=4)}")
 
     def __del__(self):
+        self._save()
+
+    def _save(self):
         mw.addonManager.writeConfig(__name__, self.raw)
         self.logger.debug(f"Addon config saved.")
 
-    def add_new_decks_to_add_on_config(self):
+    def _add_new_decks_to_add_on_config(self):
         if "decks" not in self.raw:
             self.raw["decks"] = {}
 
@@ -32,7 +36,7 @@ class AddonConfig:
                     "last_updated": 0
                 }
 
-    def update_decks_in_add_on_config(self):
+    def _update_decks_in_add_on_config(self):
         for deck in mw.col.decks.all_names_and_ids():
             d_id = str(deck.id)
             if d_id in self.raw["decks"]:
@@ -43,7 +47,7 @@ class AddonConfig:
             else:
                 self.logger.warning(f"Deck ID {d_id} not found in the configuration.")
 
-    def remove_old_decks_from_add_on_config(self):
+    def _remove_old_decks_from_add_on_config(self):
         anki_deck_ids = [str(deck.id) for deck in mw.col.decks.all_names_and_ids()]
         addon_decks = list(self.raw["decks"].keys())
 
@@ -57,7 +61,15 @@ class AddonConfig:
         if ids in self.raw["decks"]:
             self.raw["decks"][ids]["young_max_difficulty"] = young_difficulty_max
             self.raw["decks"][ids]["last_updated"] = last_updated
+            self._save()
             self.logger.debug(
                 f"Addon config updated deck id: {ids} with ydm: {young_difficulty_max} and lu: {last_updated}")
         else:
             self.logger.error(f"Deck ID {ids} not found in the configuration.")
+
+    def set_enable_deck_state(self, did: str, state: bool):
+        if did in self.raw["decks"]:
+            self.raw["decks"][did]["enabled"] = state
+            self._save()
+        else:
+            self.logger.error(f"set_enable_deck_state error")
