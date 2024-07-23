@@ -7,9 +7,9 @@ from aqt import mw
 
 
 class GUI:
-    def __init__(self, logger: logging.Logger, add_on_config: AddonConfig):
+    def __init__(self, logger: logging.Logger):
         self.logger: logging.Logger = logger
-        self.add_on_config: AddonConfig = add_on_config
+        self.add_on_config: AddonConfig = AddonConfig(self.logger)
         self.menu_button = None
 
     def add_menu_button(self):
@@ -29,7 +29,7 @@ class GUI:
         dlg.setWindowTitle("Auto New Adjuster Settings")
         layout = QGridLayout()
         layout.setContentsMargins(5, 5, 5, 5)
-        layout.addWidget(QLabel("DECK"), 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(QLabel("DECK"), 0, 0, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(QLabel("ENABLED"), 0, 1, alignment=Qt.AlignmentFlag.AlignCenter)
         i = 1
         for did in self.add_on_config.raw["decks"]:

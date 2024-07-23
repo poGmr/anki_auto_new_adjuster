@@ -4,10 +4,10 @@ import logging
 
 
 class DeckConfig:
-    def __init__(self, logger: logging.Logger, deck_id: str) -> None:
+    def __init__(self, logger: logging.Logger, did: str) -> None:
         self.logger: logging.Logger = logger
-        self.deck_id = deck_id
-        self.raw_data = mw.col.decks.config_dict_for_deck_id(deck_id)
+        self.did = did
+        self.raw_data = mw.col.decks.config_dict_for_deck_id(did)
         self.name = self.raw_data["name"]
 
     def get_pretty_config_data(self) -> str:

@@ -25,9 +25,8 @@ logger = initialize_logger()
 
 
 def profile_did_open():
-    add_on_config = AddonConfig(logger)
-    gui = GUI(logger, add_on_config)
-    gui_hooks.profile_did_open.append(gui.add_menu_button)
+    addon_gui = GUI(logger)
+    gui_hooks.profile_did_open.append(addon_gui.add_menu_button)
 
 
 def sync_will_start():

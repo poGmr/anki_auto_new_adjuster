@@ -57,15 +57,19 @@ class AddonConfig:
                     f"Deck: {self.raw['decks'][addon_deck_id]['name']} has been removed from addon config.")
                 del self.raw["decks"][addon_deck_id]
 
-    def update_deck(self, ids: str, young_difficulty_max: int, last_updated: int):
-        if ids in self.raw["decks"]:
-            self.raw["decks"][ids]["young_max_difficulty"] = young_difficulty_max
-            self.raw["decks"][ids]["last_updated"] = last_updated
+    def set_young_max_difficulty(self, did: str, young_max_difficulty: int):
+        if did in self.raw["decks"]:
+            self.raw["decks"][did]["young_max_difficulty"] = young_max_difficulty
             self._save()
-            self.logger.debug(
-                f"Addon config updated deck id: {ids} with ydm: {young_difficulty_max} and lu: {last_updated}")
         else:
-            self.logger.error(f"Deck ID {ids} not found in the configuration.")
+            self.logger.error(f"set_young_difficulty_max error")
+
+    def set_last_updated(self, did: str, last_updated: int):
+        if did in self.raw["decks"]:
+            self.raw["decks"][did]["last_updated"] = last_updated
+            self._save()
+        else:
+            self.logger.error(f"set_last_updated error")
 
     def set_enable_deck_state(self, did: str, state: bool):
         if did in self.raw["decks"]:
