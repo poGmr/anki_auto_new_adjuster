@@ -36,13 +36,17 @@ def profile_did_open():
 def sync_did_finish():
     global manager
     logger.info("Sync has been finished.")
-    manager.update_all()
+    manager.update_all_decks()
 
 
 def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2, 3, 4]):
     global manager
     logger.info("Reviewer did answer card.")
-    manager.update_all()
+    if card.odid == 0:
+        did = str(card.did)
+    else:
+        did = str(card.odid)
+    manager.update_deck(did=did)
 
 
 logger = initialize_logger()
