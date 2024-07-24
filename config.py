@@ -22,4 +22,4 @@ class DeckConfig:
             return
         self.raw_data["new"]["perDay"] = new_count
         mw.col.decks.save(self.raw_data)
-        self.logger.info(f"[{self.name}] value {new_count} of new cards per day has been saved to the configuration.")
+        self.logger.debug(f"[{self.name}] value {new_count} of new cards per day has been saved to the configuration.")

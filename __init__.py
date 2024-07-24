@@ -1,11 +1,13 @@
 from aqt import gui_hooks
-
+from aqt.reviewer import Reviewer
+from anki.cards import Card
 import logging
 import os
 from logging.handlers import RotatingFileHandler
 from .manager import Manager
 from .addon_config import AddonConfig
 from .gui import GUI
+from typing import Literal
 
 
 def initialize_logger():
@@ -17,32 +19,36 @@ def initialize_logger():
         formatter = logging.Formatter(log_format)
         file_handler.setFormatter(formatter)
         result.addHandler(file_handler)
-        result.setLevel(logging.INFO)
+        result.setLevel(logging.DEBUG)
     return result
 
 
-logger = initialize_logger()
-
-
 def profile_did_open():
-    addon_gui = GUI(logger)
+    global add_on_config
+    global manager
+    logger.info("Profile did open.")
+    add_on_config = AddonConfig(logger=logger)
+    manager = Manager(logger, add_on_config)
+    addon_gui = GUI(logger, add_on_config)
     gui_hooks.profile_did_open.append(addon_gui.add_menu_button)
 
 
-def sync_will_start():
-    logger.info("#")
-    logger.info("####################################################################################")
-    logger.info("#")
-    logger.debug("Sync has been requested.")
-
-
 def sync_did_finish():
-    logger.debug("Sync has been finished.")
-    add_on_config = AddonConfig(logger)
-    m1: Manager = Manager(logger, add_on_config)
-    m1.update()
+    global manager
+    logger.info("Sync has been finished.")
+    manager.update_all()
 
+
+def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2, 3, 4]):
+    global manager
+    logger.info("Reviewer did answer card.")
+    manager.update_all()
+
+
+logger = initialize_logger()
+add_on_config: AddonConfig
+manager: Manager
 
 gui_hooks.sync_did_finish.append(sync_did_finish)
-gui_hooks.sync_will_start.append(sync_will_start)
 gui_hooks.profile_did_open.append(profile_did_open)
+gui_hooks.reviewer_did_answer_card.append(reviewer_did_answer_card)
