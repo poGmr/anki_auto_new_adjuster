@@ -52,7 +52,7 @@ class Deck:
         ids = mw.col.find_cards(query)
         return ids
 
-    def _get_young_current_difficulty_sum(self) -> int:
+    def get_young_current_difficulty_sum(self) -> int:
         cards_id = self._get_young_cards_ids()
         young_current_difficulty_sum = 0.0
         for card_id in cards_id:
@@ -101,7 +101,7 @@ class Deck:
 
     def set_new_cards_count(self) -> None:
         young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
-        young_current_difficulty_sum = self._get_young_current_difficulty_sum()
+        young_current_difficulty_sum = self.get_young_current_difficulty_sum()
         new_set = young_max_difficulty_sum
         new_set -= young_current_difficulty_sum
         new_set += self._get_count_cards_introduced_today()

@@ -71,12 +71,12 @@ class GUI:
         decks_grid_layout.setContentsMargins(5, 5, 5, 5)
         decks_grid_layout.addWidget(QLabel("DECK"), 0, 0, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(QLabel("ENABLED"), 0, 1, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("CURRENT DIFFICULTY"), 0, 2,
+        decks_grid_layout.addWidget(QLabel("CURRENT\nDIFFICULTY"), 0, 2,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("MAX DIFFICULTY"), 0, 3, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("NEW SET"), 0, 4, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("NEW DONE"), 0, 5, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("USER FOCUS"), 0, 6, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("MAX\nDIFFICULTY"), 0, 3, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("NEW\nSET"), 0, 4, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("NEW\nDONE"), 0, 5, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("USER\nFOCUS"), 0, 6, alignment=Qt.AlignmentFlag.AlignCenter)
 
         i = 1
         for did in self.add_on_config.raw["decks"]:
@@ -107,8 +107,11 @@ class GUI:
             if enabled.isChecked():
                 young_current_difficulty_sum = QLabel(
                     str(self.add_on_config.get_deck_state(did=did, key="young_current_difficulty_sum")))
+                young_current_difficulty_sum.setHidden(False)
+
             else:
                 young_current_difficulty_sum = QLabel("-")
+                young_current_difficulty_sum.setHidden(True)
             decks_grid_layout.addWidget(young_current_difficulty_sum, i, 2, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             young_max_difficulty_sum = QSpinBox()
@@ -120,20 +123,25 @@ class GUI:
             if enabled.isChecked():
                 young_max_difficulty_sum.setValue(
                     self.add_on_config.get_deck_state(did=did, key="young_max_difficulty_sum"))
+                young_max_difficulty_sum.setHidden(False)
             else:
-                young_max_difficulty_sum.setValue(0)
+                young_max_difficulty_sum.setHidden(True)
             decks_grid_layout.addWidget(young_max_difficulty_sum, i, 3, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             if enabled.isChecked():
                 new_set = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_set")))
+                new_set.setHidden(False)
             else:
                 new_set = QLabel("-")
+                new_set.setHidden(True)
             decks_grid_layout.addWidget(new_set, i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             if enabled.isChecked():
                 new_done = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_done")))
+                new_done.setHidden(False)
             else:
                 new_done = QLabel("-")
+                new_done.setHidden(True)
             decks_grid_layout.addWidget(new_done, i, 5, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             if enabled.isChecked():
@@ -141,8 +149,10 @@ class GUI:
                 todays_user_focus_level = self.add_on_config.get_deck_state(did=did, key="todays_user_focus_level")
                 todays_user_focus_level = (round(todays_user_focus_level * 100))
                 todays_user_focus_level = QLabel(str(todays_user_focus_level) + "%")
+                todays_user_focus_level.setHidden(False)
             else:
                 todays_user_focus_level = QLabel("-")
+                todays_user_focus_level.setHidden(True)
             decks_grid_layout.addWidget(todays_user_focus_level, i, 6, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             i += 1

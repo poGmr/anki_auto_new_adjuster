@@ -14,7 +14,7 @@ def initialize_logger():
     result = logging.getLogger(__name__)
     if not result.handlers:
         log_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "auto_new_adjuster.log")
-        file_handler = RotatingFileHandler(log_file_path, maxBytes=10 * 1024 * 1024, backupCount=3)
+        file_handler = RotatingFileHandler(log_file_path, maxBytes=5 * 1024 * 1024, backupCount=3)
         log_format = "%(asctime)s [%(levelname)s]: %(message)s"
         formatter = logging.Formatter(log_format)
         file_handler.setFormatter(formatter)
