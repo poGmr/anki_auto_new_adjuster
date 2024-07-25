@@ -138,8 +138,9 @@ class GUI:
             ####################################################################################################
             if enabled.isChecked():
 
-                todays_user_focus_level = QLabel(
-                    str(self.add_on_config.get_deck_state(did=did, key="todays_user_focus_level")))
+                todays_user_focus_level = self.add_on_config.get_deck_state(did=did, key="todays_user_focus_level")
+                todays_user_focus_level = (round(todays_user_focus_level * 100))
+                todays_user_focus_level = QLabel(str(todays_user_focus_level) + "%")
             else:
                 todays_user_focus_level = QLabel("-")
             decks_grid_layout.addWidget(todays_user_focus_level, i, 6, alignment=Qt.AlignmentFlag.AlignCenter)
