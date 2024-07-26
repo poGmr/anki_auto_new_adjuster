@@ -77,12 +77,12 @@ class GUI:
         decks_grid_layout.addWidget(QLabel("NEW\nSET"), 0, 4, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(QLabel("NEW\nDONE"), 0, 5, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(QLabel("USER\nFOCUS"), 0, 6, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("STATUS"), 0, 7, alignment=Qt.AlignmentFlag.AlignCenter)
 
         i = 1
-        for did in self.add_on_config.raw["decks"]:
-            deck = self.add_on_config.raw["decks"][did]
+        for did in self.add_on_config.get_decks_ids():
             ####################################################################################################
-            deck_name = QLabel(deck["name"])
+            deck_name = QLabel(self.add_on_config.get_deck_state(did=did, key="name"))
             decks_grid_layout.addWidget(deck_name, i, 0, alignment=Qt.AlignmentFlag.AlignLeft)
             ####################################################################################################
             enabled = QCheckBox()
@@ -99,7 +99,7 @@ class GUI:
                             background-color: red;
                         }
                                 """)
-            enabled.setChecked(deck["enabled"])
+            enabled.setChecked(self.add_on_config.get_deck_state(did=did, key="enabled"))
             enabled.stateChanged.connect(
                 lambda state, checkbox=enabled: self.enable_checkbox_change_state(state, checkbox))
             decks_grid_layout.addWidget(enabled, i, 1, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -154,6 +154,14 @@ class GUI:
                 todays_user_focus_level = QLabel("-")
                 todays_user_focus_level.setHidden(True)
             decks_grid_layout.addWidget(todays_user_focus_level, i, 6, alignment=Qt.AlignmentFlag.AlignCenter)
+            ####################################################################################################
+            if enabled.isChecked():
+                status = QLabel(str(self.add_on_config.get_deck_state(did=did, key="status")))
+                status.setHidden(False)
+            else:
+                status = QLabel("-")
+                status.setHidden(True)
+            decks_grid_layout.addWidget(status, i, 7, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             i += 1
         decks_group_box = QGroupBox("DECKS")

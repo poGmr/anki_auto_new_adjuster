@@ -19,10 +19,10 @@ class AddonConfig:
         mw.addonManager.writeConfig(__name__, self.raw)
 
     def _init_decks_update(self):
+        self.logger.debug("_init_decks_update")
         self._add_new_decks_to_add_on_config()
         self._update_decks_in_add_on_config()
         self._remove_old_decks_from_add_on_config()
-        self.logger.debug(f"Addon config loaded and updated.")
         self._save()
 
     def _add_new_decks_to_add_on_config(self):
@@ -35,7 +35,7 @@ class AddonConfig:
         self.raw["global"]["highest_young_max_difficulty_sum"] = 210
 
         if "decks" not in self.raw:
-            self.raw["decks"] = {}
+            self.raw["decks"]: dict = {}
 
         for deck in mw.col.decks.all_names_and_ids():
             d_id = str(deck.id)
@@ -48,7 +48,8 @@ class AddonConfig:
                     "young_current_difficulty_sum": 0,
                     "new_set": 0,
                     "new_done": 0,
-                    "todays_user_focus_level": 0
+                    "todays_user_focus_level": 0,
+                    "status": "-"
                 }
 
     def _update_decks_in_add_on_config(self):
@@ -105,3 +106,6 @@ class AddonConfig:
             self._save()
         else:
             self.logger.error(f"set_deck_state error")
+
+    def get_decks_ids(self) -> list[str]:
+        return sorted(list(self.raw["decks"].keys()))

@@ -17,9 +17,3 @@ class Manager:
             deck = Deck(did=did, logger=self.logger, add_on_config=self.add_on_config)
             self.add_on_config.set_deck_state(did=did, key="young_current_difficulty_sum",
                                               value=deck.get_young_current_difficulty_sum())
-            if deck.get_count_still_in_queue() > 0:
-                deck.deck_config.set_new_count(new_count=0)
-                self.logger.debug(f"[{deck.name}] Cards still in queue - no action to take.")
-            else:
-                deck.set_deck_difficulty()
-                deck.set_new_cards_count()

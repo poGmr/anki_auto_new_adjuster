@@ -14,6 +14,26 @@ class Deck:
         self.id: str = str(self.raw_data["id"])
         self.name: str = self.raw_data["name"]
         self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id)
+        self.update_status()
+
+    def update_status(self) -> None:
+        if self.get_count_still_in_queue() > 0:
+            self.add_on_config.set_deck_state(did=self.id, key="status", value="REVIEW")
+            self.deck_config.set_new_count(new_count=0)
+            self.logger.debug(f"[{self.name}] Cards still in review queue - no action to take.")
+            return
+
+        self.set_deck_difficulty()
+
+        if self.add_on_config.get_deck_state(did=self.id,
+                                             key="young_current_difficulty_sum") >= self.add_on_config.get_deck_state(
+            did=self.id, key="young_max_difficulty_sum"):
+            self.add_on_config.set_deck_state(did=self.id, key="status", value="DONE")
+            self.deck_config.set_new_count(new_count=0)
+            return
+        self.add_on_config.set_deck_state(did=self.id, key="status", value="NEW")
+        # self.set_new_cards_count()
+        self.deck_config.set_new_count(new_count=100)
 
     def _get_card_difficulty(self, card_id: int) -> float:
         query = f"SELECT json_extract(data, '$.d') FROM cards WHERE id={card_id}"
@@ -87,14 +107,14 @@ class Deck:
             young_max_difficulty_sum = max(low_young_max_difficulty, young_max_difficulty_sum - 1)
             self.add_on_config.set_deck_state(did=self.id, key="young_max_difficulty_sum",
                                               value=young_max_difficulty_sum)
-            self.logger.info(f"Young max difficulty sum decreased to {young_max_difficulty_sum}.")
+            self.logger.info(f"[{self.name}] Young max difficulty sum decreased to {young_max_difficulty_sum}.")
 
         if low_focus_level <= todays_user_focus_level < high_focus_level:
-            self.logger.info(f"No need to adjust young max difficulty sum.")
+            self.logger.info(f"[{self.name}] No need to adjust young max difficulty sum.")
 
         if todays_user_focus_level >= high_focus_level:
             young_max_difficulty_sum = min(high_young_max_difficulty, young_max_difficulty_sum + 1)
-            self.logger.info(f"Young max difficulty sum increased to {young_max_difficulty_sum}.")
+            self.logger.info(f"[{self.name}] Young max difficulty sum increased to {young_max_difficulty_sum}.")
             self.add_on_config.set_deck_state(did=self.id, key="young_max_difficulty_sum",
                                               value=young_max_difficulty_sum)
         self.add_on_config.set_deck_state(did=self.id, key="last_updated", value=int(time()))
@@ -111,5 +131,6 @@ class Deck:
         self.add_on_config.set_deck_state(did=self.id, key="new_set", value=new_set)
 
         logger_output = f"[{self.name}] Young current difficulty sum: {young_current_difficulty_sum}."
-        logger_output += f" Young max difficulty sum: {young_max_difficulty_sum}"
+        logger_output += f" Young max difficulty sum: {young_max_difficulty_sum}."
+        logger_output += f" Status: {self.add_on_config.get_deck_state(did=self.id, key='status')}"
         self.logger.info(logger_output)
