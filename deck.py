@@ -27,6 +27,7 @@ class Deck:
             return
 
         self._update_deck_difficulty()
+        self._update_new_done_cards()
 
         young_current_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
                                                                          key="young_current_difficulty_sum")
@@ -36,7 +37,7 @@ class Deck:
             self.deck_config.set_new_count(new_count=0)
             return
         self.add_on_config.set_deck_state(did=self.id, key="status", value="NEW")
-        self.deck_config.set_new_count(new_count=100)
+        self.deck_config.set_new_count(new_count=999)
 
     def _get_card_difficulty(self, card_id: int) -> float:
         query = f"SELECT json_extract(data, '$.d') FROM cards WHERE id={card_id}"
@@ -68,6 +69,11 @@ class Deck:
         query += f'-("is:buried" OR "is:suspended")'
         ids = mw.col.find_cards(query)
         return ids
+
+    def _update_new_done_cards(self):
+        query = f'"deck:{self.name}" AND "introduced:1"'
+        count = len(mw.col.find_cards(query))
+        self.add_on_config.set_deck_state(did=self.id, key="new_done", value=count)
 
     def _update_young_current_difficulty_sum(self) -> None:
         cards_id = self._get_young_cards_ids()
