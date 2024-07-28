@@ -74,10 +74,9 @@ class GUI:
         decks_grid_layout.addWidget(QLabel("CURRENT\nDIFFICULTY"), 0, 2,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(QLabel("MAX\nDIFFICULTY"), 0, 3, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("NEW\nSET"), 0, 4, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("NEW\nDONE"), 0, 5, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("USER\nFOCUS"), 0, 6, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("STATUS"), 0, 7, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("NEW\nDONE"), 0, 4, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("USER\nFOCUS"), 0, 5, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("STATUS"), 0, 6, alignment=Qt.AlignmentFlag.AlignCenter)
 
         i = 1
         for did in self.add_on_config.get_decks_ids():
@@ -129,20 +128,12 @@ class GUI:
             decks_grid_layout.addWidget(young_max_difficulty_sum, i, 3, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             if enabled.isChecked():
-                new_set = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_set")))
-                new_set.setHidden(False)
-            else:
-                new_set = QLabel("-")
-                new_set.setHidden(True)
-            decks_grid_layout.addWidget(new_set, i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
-            ####################################################################################################
-            if enabled.isChecked():
                 new_done = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_done")))
                 new_done.setHidden(False)
             else:
                 new_done = QLabel("-")
                 new_done.setHidden(True)
-            decks_grid_layout.addWidget(new_done, i, 5, alignment=Qt.AlignmentFlag.AlignCenter)
+            decks_grid_layout.addWidget(new_done, i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             if enabled.isChecked():
 
@@ -153,7 +144,7 @@ class GUI:
             else:
                 todays_user_focus_level = QLabel("-")
                 todays_user_focus_level.setHidden(True)
-            decks_grid_layout.addWidget(todays_user_focus_level, i, 6, alignment=Qt.AlignmentFlag.AlignCenter)
+            decks_grid_layout.addWidget(todays_user_focus_level, i, 5, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             if enabled.isChecked():
                 status = QLabel(str(self.add_on_config.get_deck_state(did=did, key="status")))
@@ -161,7 +152,7 @@ class GUI:
             else:
                 status = QLabel("-")
                 status.setHidden(True)
-            decks_grid_layout.addWidget(status, i, 7, alignment=Qt.AlignmentFlag.AlignCenter)
+            decks_grid_layout.addWidget(status, i, 6, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             i += 1
         decks_group_box = QGroupBox("DECKS")

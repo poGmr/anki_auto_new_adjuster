@@ -15,5 +15,3 @@ class Manager:
     def update_deck(self, did: str) -> None:
         if self.add_on_config.get_deck_state(did=did, key="enabled"):
             deck = Deck(did=did, logger=self.logger, add_on_config=self.add_on_config)
-            self.add_on_config.set_deck_state(did=did, key="young_current_difficulty_sum",
-                                              value=deck.get_young_current_difficulty_sum())

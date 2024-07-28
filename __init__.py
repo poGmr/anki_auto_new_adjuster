@@ -26,9 +26,9 @@ def initialize_logger():
 def profile_did_open():
     global add_on_config
     global manager
-    logger.info("#")
-    logger.info("################################### Profile did open.")
-    logger.info("#")
+    logger.debug("#")
+    logger.debug("################################### profile_did_open ###################################")
+    logger.debug("#")
     add_on_config = AddonConfig(logger=logger)
     manager = Manager(logger, add_on_config)
     addon_gui = GUI(logger, add_on_config)
@@ -37,17 +37,17 @@ def profile_did_open():
 
 def sync_did_finish():
     global manager
-    logger.info("#")
-    logger.info("################################### Sync has been finished.")
-    logger.info("#")
+    logger.debug("#")
+    logger.debug("################################### sync_did_finish ###################################")
+    logger.debug("#")
     manager.update_all_decks()
 
 
 def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2, 3, 4]):
     global manager
-    logger.info("#")
-    logger.info("################################### Reviewer did answer card.")
-    logger.info("#")
+    logger.debug("#")
+    logger.debug("################################### reviewer_did_answer_card ###################################")
+    logger.debug("#")
     if card.odid == 0:
         did = str(card.did)
     else:
@@ -55,7 +55,16 @@ def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2,
     manager.update_deck(did=did)
 
 
+def reviewer_will_end():
+    logger.debug("#")
+    logger.debug("################################### reviewer_will_end ###################################")
+    logger.debug("#")
+
+
 logger = initialize_logger()
+logger.debug("#")
+logger.debug("#")
+logger.debug("#")
 add_on_config: AddonConfig
 manager: Manager
 

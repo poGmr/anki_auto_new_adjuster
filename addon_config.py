@@ -10,10 +10,6 @@ class AddonConfig:
         self.raw: Dict[str, Any] = mw.addonManager.getConfig(__name__)
         self._init_decks_update()
 
-    def __del__(self):
-        self.logger.debug("__del__")
-        self._save()
-
     def _save(self):
         self.logger.debug("_save")
         mw.addonManager.writeConfig(__name__, self.raw)
@@ -46,9 +42,8 @@ class AddonConfig:
                     "young_max_difficulty_sum": 21,
                     "last_updated": 0,
                     "young_current_difficulty_sum": 0,
-                    "new_set": 0,
                     "new_done": 0,
-                    "todays_user_focus_level": 0,
+                    "todays_user_focus_level": 0.0,
                     "status": "-"
                 }
 
@@ -92,11 +87,12 @@ class AddonConfig:
             self.logger.error(f"set_global_state error")
 
     def get_deck_state(self, did: str, key: str):
-        self.logger.debug(f"get_deck_state did {did} key {key}")
         if did in self.raw["decks"] and key in self.raw["decks"][did]:
-            return self.raw["decks"][did][key]
+            value = self.raw["decks"][did][key]
+            self.logger.debug(f"get_deck_state did {did} key {key} value {value}")
+            return value
         else:
-            self.logger.error(f"get_deck_state error")
+            self.logger.error(f"get_deck_state did {did} key {key}")
             return None
 
     def set_deck_state(self, did: str, key: str, value):
