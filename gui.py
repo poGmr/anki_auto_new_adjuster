@@ -30,38 +30,24 @@ class GUI:
         global_grid_layout = QGridLayout()
         ####################################################################################################
         global_grid_layout.addWidget(QLabel("Low focus level:"), 0, 0)
-        global_spin_box_low = QDoubleSpinBox()
-        global_spin_box_low.setEnabled(False)
-        global_spin_box_low.setRange(0.00, 1.00)
-        global_spin_box_low.setSingleStep(0.01)
-        global_spin_box_low.setDecimals(2)
-        global_spin_box_low.setValue(self.add_on_config.get_global_state(key="low_focus_level"))
-        global_grid_layout.addWidget(global_spin_box_low, 0, 1)
+        low_focus_level_value = round(100 * self.add_on_config.get_global_state(key="low_focus_level"))
+        low_focus_level = QLabel(str(low_focus_level_value) + "%")
+        global_grid_layout.addWidget(low_focus_level, 0, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         ####################################################################################################
         global_grid_layout.addWidget(QLabel("High focus level:"), 1, 0)
-        global_spin_box_high = QDoubleSpinBox()
-        global_spin_box_high.setEnabled(False)
-        global_spin_box_high.setRange(0.00, 1.00)
-        global_spin_box_high.setSingleStep(0.01)
-        global_spin_box_high.setDecimals(2)
-        global_spin_box_high.setValue(self.add_on_config.get_global_state(key="high_focus_level"))
-        global_grid_layout.addWidget(global_spin_box_high, 1, 1)
+        high_focus_level_value = round(100 * self.add_on_config.get_global_state(key="high_focus_level"))
+        high_focus_level = QLabel(str(high_focus_level_value) + "%")
+        global_grid_layout.addWidget(high_focus_level, 1, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         ####################################################################################################
         global_grid_layout.addWidget(QLabel("Lowest deck difficulty:"), 2, 0)
-        global_spin_box_low = QSpinBox()
-        global_spin_box_low.setEnabled(False)
-        global_spin_box_low.setMinimum(0)
-        global_spin_box_low.setMaximum(999)
-        global_spin_box_low.setValue(self.add_on_config.get_global_state(key="lowest_young_max_difficulty_sum"))
-        global_grid_layout.addWidget(global_spin_box_low, 2, 1)
+        lowest_young_max_difficulty_sum = QLabel(
+            str(self.add_on_config.get_global_state(key="lowest_young_max_difficulty_sum")))
+        global_grid_layout.addWidget(lowest_young_max_difficulty_sum, 2, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         ####################################################################################################
         global_grid_layout.addWidget(QLabel("Highest deck difficulty:"), 3, 0)
-        global_spin_box_high = QSpinBox()
-        global_spin_box_high.setEnabled(False)
-        global_spin_box_high.setMinimum(0)
-        global_spin_box_high.setMaximum(999)
-        global_spin_box_high.setValue(self.add_on_config.get_global_state(key="highest_young_max_difficulty_sum"))
-        global_grid_layout.addWidget(global_spin_box_high, 3, 1)
+        highest_young_max_difficulty_sum = QLabel(
+            str(self.add_on_config.get_global_state(key="highest_young_max_difficulty_sum")))
+        global_grid_layout.addWidget(highest_young_max_difficulty_sum, 3, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         ####################################################################################################
         global_group_box.setLayout(global_grid_layout)
         return global_group_box
@@ -102,56 +88,28 @@ class GUI:
             enabled.stateChanged.connect(
                 lambda state, checkbox=enabled: self.enable_checkbox_change_state(state, checkbox))
             decks_grid_layout.addWidget(enabled, i, 1, alignment=Qt.AlignmentFlag.AlignCenter)
+            if not enabled.isChecked():
+                i += 1
+                continue
             ####################################################################################################
-            if enabled.isChecked():
-                young_current_difficulty_sum = QLabel(
-                    str(self.add_on_config.get_deck_state(did=did, key="young_current_difficulty_sum")))
-                young_current_difficulty_sum.setHidden(False)
+            young_current_difficulty_sum = QLabel(
+                str(self.add_on_config.get_deck_state(did=did, key="young_current_difficulty_sum")))
 
-            else:
-                young_current_difficulty_sum = QLabel("-")
-                young_current_difficulty_sum.setHidden(True)
             decks_grid_layout.addWidget(young_current_difficulty_sum, i, 2, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
-            young_max_difficulty_sum = QSpinBox()
-            young_max_difficulty_sum.setEnabled(False)
-            young_max_difficulty_sum.setMinimum(0)
-            young_max_difficulty_sum.setMaximum(999)
-            young_max_difficulty_sum.setValue(
-                self.add_on_config.get_deck_state(did=did, key="young_max_difficulty_sum"))
-            if enabled.isChecked():
-                young_max_difficulty_sum.setValue(
-                    self.add_on_config.get_deck_state(did=did, key="young_max_difficulty_sum"))
-                young_max_difficulty_sum.setHidden(False)
-            else:
-                young_max_difficulty_sum.setHidden(True)
+            young_max_difficulty_sum = QLabel(
+                str(self.add_on_config.get_deck_state(did=did, key="young_max_difficulty_sum")))
             decks_grid_layout.addWidget(young_max_difficulty_sum, i, 3, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
-            if enabled.isChecked():
-                new_done = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_done")))
-                new_done.setHidden(False)
-            else:
-                new_done = QLabel("-")
-                new_done.setHidden(True)
+            new_done = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_done")))
             decks_grid_layout.addWidget(new_done, i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
-            if enabled.isChecked():
-
-                todays_user_focus_level = self.add_on_config.get_deck_state(did=did, key="todays_user_focus_level")
-                todays_user_focus_level = (round(todays_user_focus_level * 100))
-                todays_user_focus_level = QLabel(str(todays_user_focus_level) + "%")
-                todays_user_focus_level.setHidden(False)
-            else:
-                todays_user_focus_level = QLabel("-")
-                todays_user_focus_level.setHidden(True)
+            todays_user_focus_level = self.add_on_config.get_deck_state(did=did, key="todays_user_focus_level")
+            todays_user_focus_level = (round(todays_user_focus_level * 100))
+            todays_user_focus_level = QLabel(str(todays_user_focus_level) + "%")
             decks_grid_layout.addWidget(todays_user_focus_level, i, 5, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
-            if enabled.isChecked():
-                status = QLabel(str(self.add_on_config.get_deck_state(did=did, key="status")))
-                status.setHidden(False)
-            else:
-                status = QLabel("-")
-                status.setHidden(True)
+            status = QLabel(str(self.add_on_config.get_deck_state(did=did, key="status")))
             decks_grid_layout.addWidget(status, i, 6, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             i += 1

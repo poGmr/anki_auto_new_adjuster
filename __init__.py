@@ -19,16 +19,14 @@ def initialize_logger():
         formatter = logging.Formatter(log_format)
         file_handler.setFormatter(formatter)
         result.addHandler(file_handler)
-        result.setLevel(logging.DEBUG)
+        result.setLevel(logging.INFO)
     return result
 
 
 def profile_did_open():
     global add_on_config
     global manager
-    logger.debug("#")
-    logger.debug("################################### profile_did_open ###################################")
-    logger.debug("#")
+    logger.info("#")
     add_on_config = AddonConfig(logger=logger)
     manager = Manager(logger, add_on_config)
     addon_gui = GUI(logger, add_on_config)

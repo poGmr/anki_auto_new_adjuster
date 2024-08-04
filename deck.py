@@ -105,6 +105,7 @@ class Deck:
             return
 
         todays_user_focus_level = self._get_todays_user_focus_level()
+        self.logger.info(f"[{self.name}] Today's user focus level: {round(todays_user_focus_level * 100)}%")
         if todays_user_focus_level < low_focus_level:
             young_max_difficulty_sum = max(low_young_max_difficulty, young_max_difficulty_sum - 1)
             self.add_on_config.set_deck_state(did=self.id, key="young_max_difficulty_sum",
