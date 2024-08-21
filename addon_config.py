@@ -1,25 +1,46 @@
 from aqt import mw
 import logging
 from typing import Dict, Any
+import os
+import json
 
 
 class AddonConfig:
     def __init__(self, logger: logging.Logger):
         self.logger: logging.Logger = logger
         self.logger.debug("__init__")
-        self.raw: Dict[str, Any] = mw.addonManager.getConfig(__name__)
+        self.raw: Dict[str, Any] = self._load()
         self._init_decks_update()
+
+    def __exit__(self):
+        self.logger.debug("__exit__")
+        self._save()
+
+    def _load(self):
+        self.logger.debug("_load")
+        profile_folder = mw.pm.profileFolder()
+        config_path = os.path.join(profile_folder, "auto_new_adjuster_config.json")
+        if os.path.exists(config_path):
+            with open(config_path, "r") as f:
+                config = json.load(f)
+        else:
+            config = {}
+        return config
 
     def _save(self):
         self.logger.debug("_save")
-        mw.addonManager.writeConfig(__name__, self.raw)
+        profile_folder = mw.pm.profileFolder()
+        config_path = os.path.join(profile_folder, "auto_new_adjuster_config.json")
+
+        with open(config_path, "w") as f:
+            json.dump(self.raw, f, indent=4)
 
     def _init_decks_update(self):
+        # TODO: Filter filtered decks
         self.logger.debug("_init_decks_update")
         self._add_new_decks_to_add_on_config()
         self._update_decks_in_add_on_config()
         self._remove_old_decks_from_add_on_config()
-        self._save()
 
     def _add_new_decks_to_add_on_config(self):
         self.logger.debug("_add_new_decks_to_add_on_config")
@@ -35,6 +56,10 @@ class AddonConfig:
 
         for deck in mw.col.decks.all_names_and_ids():
             d_id = str(deck.id)
+            deck_info = mw.col.decks.get(d_id)
+            if deck_info['dyn'] == 1:
+                continue
+
             if d_id not in self.raw["decks"]:
                 self.raw["decks"][d_id] = {
                     "name": deck.name,
@@ -43,7 +68,7 @@ class AddonConfig:
                     "last_updated": 0,
                     "young_current_difficulty_sum": 0,
                     "new_done": 0,
-                    "todays_user_focus_level": 0.0,
+                    "todays_user_focus_level": 0.9,
                     "status": "-"
                 }
 
@@ -51,6 +76,9 @@ class AddonConfig:
         self.logger.debug("_update_decks_in_add_on_config")
         for deck in mw.col.decks.all_names_and_ids():
             d_id = str(deck.id)
+            deck_info = mw.col.decks.get(d_id)
+            if deck_info['dyn'] == 1:
+                continue
             if d_id in self.raw["decks"]:
                 if self.raw["decks"][d_id]["name"] != deck.name:
                     self.logger.debug(
@@ -82,7 +110,6 @@ class AddonConfig:
         self.logger.debug(f"set_global_state key {key} value {value}")
         if key in self.raw["global"]:
             self.raw["global"][key] = value
-            self._save()
         else:
             self.logger.error(f"set_global_state error")
 
@@ -99,7 +126,6 @@ class AddonConfig:
         self.logger.debug(f"set_deck_state did {did} key {key} value {value}")
         if did in self.raw["decks"]:
             self.raw["decks"][did][key] = value
-            self._save()
         else:
             self.logger.error(f"set_deck_state error")
 

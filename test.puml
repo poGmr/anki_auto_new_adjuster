@@ -1,0 +1,32 @@
+@startuml
+'|state|
+
+[*]-->RESET
+RESET-->REVIEW
+RESET: self.add_on_config.set_deck_state(did=self.id, key="new_done", value=0)
+RESET: self.deck_config.set_new_count(new_count=0)
+REVIEW: _update_young_current_difficulty_sum()
+REVIEW: _update_todays_user_focus_level()
+REVIEW--->REVIEW: self._get_count_still_in_queue() > 0
+REVIEW-->WAIT: self._get_count_still_in_queue() == 0
+WAIT->WAIT: get_global_count_still_in_queue() > 0
+WAIT-->NEW: get_global_count_still_in_queue() == 0
+NEW->NEW: young_current_difficulty_sum < young_max_difficulty_sum
+NEW-->DONE : young_current_difficulty_sum >= young_max_difficulty_sum
+DONE-->[*]
+
+'OrderCreated --> PaymentPending: order_created()
+'
+'PaymentPending --> Paid: payment_successful()
+'PaymentPending -> PaymentPending: payment_failed() \n[payment_attempts < max_payment_attempts]
+'PaymentPending -> PaymentFailed: payment_failed() \n[payment_attempts >= max_payment_attempts]
+'
+'Paid -> Shipped: shipping_successful()
+'Paid -> ShippingError: shipping_failed()
+'
+'Shipped --> Delivered: order_delivered()
+'
+'PaymentFailed -> [*]
+'ShippingError -> [*]
+'Delivered -> [*]
+@enduml

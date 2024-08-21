@@ -6,6 +6,19 @@ from time import time
 from .addon_config import AddonConfig
 
 
+def get_card_difficulty(card_id: int) -> float:
+    query = f"SELECT json_extract(data, '$.d') FROM cards WHERE id={card_id}"
+    d = mw.col.db.all(query)[0][0]
+    d = (d - 1) / 9
+    return d
+
+
+def get_global_count_still_in_queue() -> int:
+    query = "is:due"
+    cards_count = len(mw.col.find_cards(query))
+    return cards_count
+
+
 class Deck:
     def __init__(self, did: str, logger: logging.Logger, add_on_config: AddonConfig) -> None:
         self.logger: logging.Logger = logger
@@ -18,7 +31,7 @@ class Deck:
 
     def update_status(self) -> None:
         self._update_young_current_difficulty_sum()
-        self._get_todays_user_focus_level()
+        self._update_todays_user_focus_level()
         if self._get_count_still_in_queue() > 0:
             self.add_on_config.set_deck_state(did=self.id, key="status", value="REVIEW")
             self.add_on_config.set_deck_state(did=self.id, key="new_done", value=0)
@@ -36,16 +49,13 @@ class Deck:
             self.add_on_config.set_deck_state(did=self.id, key="status", value="DONE")
             self.deck_config.set_new_count(new_count=0)
             return
+        if get_global_count_still_in_queue() > 0:
+            self.add_on_config.set_deck_state(did=self.id, key="status", value="WAIT")
+            return
         self.add_on_config.set_deck_state(did=self.id, key="status", value="NEW")
         self.deck_config.set_new_count(new_count=999)
 
-    def _get_card_difficulty(self, card_id: int) -> float:
-        query = f"SELECT json_extract(data, '$.d') FROM cards WHERE id={card_id}"
-        d = mw.col.db.all(query)[0][0]
-        d = (d - 1) / 9
-        return d
-
-    def _get_todays_user_focus_level(self) -> float:
+    def _update_todays_user_focus_level(self) -> None:
         cut_off_time = (mw.col.sched.day_cutoff - (60 * 60 * 24)) * 1000
         query = f"SELECT count(*), SUM(CASE WHEN revlog.ease = 1 THEN 1 ELSE 0 END) "
         query += f"FROM revlog JOIN cards ON revlog.cid = cards.id "
@@ -60,7 +70,6 @@ class Deck:
             todays_user_focus_level = 0.90
         self.logger.debug(f"[{self.name}] Today's user focus level: {round(todays_user_focus_level * 100)}%")
         self.add_on_config.set_deck_state(did=self.id, key="todays_user_focus_level", value=todays_user_focus_level)
-        return todays_user_focus_level
 
     def _get_young_cards_ids(self) -> Sequence:
         query = f'"deck:{self.name}" AND '
@@ -79,7 +88,7 @@ class Deck:
         cards_id = self._get_young_cards_ids()
         young_current_difficulty_sum = 0.0
         for card_id in cards_id:
-            young_current_difficulty_sum += self._get_card_difficulty(card_id=card_id)
+            young_current_difficulty_sum += get_card_difficulty(card_id=card_id)
         young_current_difficulty_sum = round(young_current_difficulty_sum)
         self.add_on_config.set_deck_state(did=self.id, key="young_current_difficulty_sum",
                                           value=young_current_difficulty_sum)
@@ -104,20 +113,20 @@ class Deck:
             self.logger.debug(logger_output)
             return
 
-        todays_user_focus_level = self._get_todays_user_focus_level()
+        todays_user_focus_level = self.add_on_config.get_deck_state(did=self.id, key="todays_user_focus_level")
         self.logger.info(f"[{self.name}] Today's user focus level: {round(todays_user_focus_level * 100)}%")
         if todays_user_focus_level < low_focus_level:
             young_max_difficulty_sum = max(low_young_max_difficulty, young_max_difficulty_sum - 1)
             self.add_on_config.set_deck_state(did=self.id, key="young_max_difficulty_sum",
                                               value=young_max_difficulty_sum)
-            self.logger.info(f"[{self.name}] Young max difficulty sum decreased to {young_max_difficulty_sum}.")
+            self.logger.info(f"[{self.name}] Young max difficulty sum \u2193 to {young_max_difficulty_sum}.")
 
         if low_focus_level <= todays_user_focus_level < high_focus_level:
-            self.logger.info(f"[{self.name}] No need to adjust young max difficulty sum.")
+            self.logger.info(f"[{self.name}] No need to \u2191\u2193 young max difficulty sum.")
 
         if todays_user_focus_level >= high_focus_level:
             young_max_difficulty_sum = min(high_young_max_difficulty, young_max_difficulty_sum + 1)
-            self.logger.info(f"[{self.name}] Young max difficulty sum increased to {young_max_difficulty_sum}.")
+            self.logger.info(f"[{self.name}] Young max difficulty sum \u2191 to {young_max_difficulty_sum}.")
             self.add_on_config.set_deck_state(did=self.id, key="young_max_difficulty_sum",
                                               value=young_max_difficulty_sum)
         self.add_on_config.set_deck_state(did=self.id, key="last_updated", value=int(time()))

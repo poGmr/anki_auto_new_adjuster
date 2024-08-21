@@ -26,11 +26,27 @@ def initialize_logger():
 def profile_did_open():
     global add_on_config
     global manager
+    global gui_menu
+    logger.debug("#")
+    logger.debug("################################### profile_did_open ###################################")
     logger.info("#")
     add_on_config = AddonConfig(logger=logger)
     manager = Manager(logger, add_on_config)
-    addon_gui = GUI(logger, add_on_config)
-    gui_hooks.profile_did_open.append(addon_gui.add_menu_button)
+    gui_menu = GUI(logger, add_on_config)
+    gui_hooks.profile_did_open.append(gui_menu.add_menu_button)
+
+
+def profile_will_close():
+    global add_on_config
+    global gui_menu
+    logger.debug("#")
+    logger.debug("################################### profile_will_close ###################################")
+    logger.debug("#")
+    gui_hooks.profile_did_open.remove(gui_menu.add_menu_button)
+    gui_menu.__exit__()
+    del gui_menu
+    add_on_config.__exit__()
+    del add_on_config
 
 
 def sync_did_finish():
@@ -60,12 +76,11 @@ def reviewer_will_end():
 
 
 logger = initialize_logger()
-logger.debug("#")
-logger.debug("#")
-logger.debug("#")
 add_on_config: AddonConfig
 manager: Manager
+gui_menu: GUI
 
 gui_hooks.sync_did_finish.append(sync_did_finish)
 gui_hooks.profile_did_open.append(profile_did_open)
 gui_hooks.reviewer_did_answer_card.append(reviewer_did_answer_card)
+gui_hooks.profile_will_close.append(profile_will_close)
