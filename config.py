@@ -1,13 +1,16 @@
 import json
 from aqt import mw
 import logging
+from .addon_config import AddonConfig
 
 
 class DeckConfig:
-    def __init__(self, logger: logging.Logger, did: str) -> None:
+    def __init__(self, logger: logging.Logger, did: str, add_on_config: AddonConfig) -> None:
         self.logger: logging.Logger = logger
+        self.add_on_config: AddonConfig = add_on_config
         self.did = did
         self.raw_data = mw.col.decks.config_dict_for_deck_id(did)
+        self.id: str = str(self.raw_data["id"])
         self.name = self.raw_data["name"]
 
     def get_pretty_config_data(self) -> str:

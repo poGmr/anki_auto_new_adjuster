@@ -3,6 +3,7 @@ import logging
 from typing import Dict, Any
 import os
 import json
+from collections import Counter
 
 
 class AddonConfig:
@@ -36,7 +37,6 @@ class AddonConfig:
             json.dump(self.raw, f, indent=4)
 
     def _init_decks_update(self):
-        # TODO: Filter filtered decks
         self.logger.debug("_init_decks_update")
         self._add_new_decks_to_add_on_config()
         self._update_decks_in_add_on_config()
@@ -64,11 +64,12 @@ class AddonConfig:
                 self.raw["decks"][d_id] = {
                     "name": deck.name,
                     "enabled": False,
-                    "young_max_difficulty_sum": 21,
+                    "young_max_difficulty_sum": self.raw["global"]["lowest_young_max_difficulty_sum"],
                     "last_updated": 0,
                     "young_current_difficulty_sum": 0,
                     "new_done": 0,
                     "todays_user_focus_level": 0.9,
+                    "config_id": deck_info['conf'],
                     "status": "-"
                 }
 
@@ -81,9 +82,14 @@ class AddonConfig:
                 continue
             if d_id in self.raw["decks"]:
                 if self.raw["decks"][d_id]["name"] != deck.name:
-                    self.logger.debug(
+                    self.logger.warning(
                         f"Deck ID: {d_id} has been renamed from '{self.raw['decks'][d_id]['name']}' to '{deck.name}'")
                     self.raw["decks"][d_id]["name"] = deck.name
+
+                if self.raw["decks"][d_id]["config_id"] != deck_info["conf"]:
+                    self.logger.warning(
+                        f"Deck ID: {d_id} has been changed config from '{self.raw['decks'][d_id]['config_id']}' to '{deck_info['conf']}'")
+                    self.raw["decks"][d_id]["config_id"] = deck_info["conf"]
             else:
                 self.logger.warning(f"Deck ID {d_id} not found in the configuration.")
 
@@ -131,3 +137,12 @@ class AddonConfig:
 
     def get_decks_ids(self) -> list[str]:
         return sorted(list(self.raw["decks"].keys()))
+
+    def get_duplicated_config_ids(self) -> list[str]:
+        config_ids: list = []
+        for did in self.raw["decks"]:
+            config_ids.append(str(self.raw["decks"][did]["config_id"]))
+        duplicated_config_ids = Counter(config_ids)
+        duplicated_config_ids = [config_id for config_id, count in duplicated_config_ids.items() if count > 1]
+        self.logger.debug(f"duplicated_config_ids {duplicated_config_ids}")
+        return duplicated_config_ids

@@ -26,12 +26,16 @@ class Deck:
         self.raw_data: dict[str, str] = mw.col.decks.get(did)
         self.id: str = str(self.raw_data["id"])
         self.name: str = self.raw_data["name"]
-        self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id)
+        self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id, add_on_config=add_on_config)
         self.update_status()
 
     def update_status(self) -> None:
         self._update_young_current_difficulty_sum()
         self._update_todays_user_focus_level()
+        if self.deck_config.id in self.add_on_config.get_duplicated_config_ids():
+            self.add_on_config.set_deck_state(did=self.id, key="status", value="ERROR")
+            self.logger.error(f"[{self.name}] Config '{self.deck_config.name}' is used by other deck.")
+            return
         if self._get_count_still_in_queue() > 0:
             self.add_on_config.set_deck_state(did=self.id, key="status", value="REVIEW")
             self.add_on_config.set_deck_state(did=self.id, key="new_done", value=0)

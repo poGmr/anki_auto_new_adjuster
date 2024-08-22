@@ -32,6 +32,7 @@ def profile_did_open():
     logger.info("#")
     add_on_config = AddonConfig(logger=logger)
     manager = Manager(logger, add_on_config)
+    manager.update_all_decks()
     gui_menu = GUI(logger, add_on_config)
     gui_hooks.profile_did_open.append(gui_menu.add_menu_button)
 
