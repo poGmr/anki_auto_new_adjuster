@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QDialog, QLabel, QCheckBox, QGridLayout, QGroupBox, QVBoxLayout, \
     QDoubleSpinBox, QSpinBox
-from PyQt6.QtGui import QAction
+
 from PyQt6.QtCore import Qt
 import logging
 from .addon_config import AddonConfig
@@ -11,15 +11,6 @@ class GUI:
     def __init__(self, logger: logging.Logger, add_on_config: AddonConfig):
         self.logger: logging.Logger = logger
         self.add_on_config: AddonConfig = add_on_config
-        self.menu_button = None
-
-    def __exit__(self):
-        mw.form.menuTools.removeAction(self.menu_button)
-
-    def add_menu_button(self):
-        self.menu_button = QAction("Auto New Adjuster", mw)
-        self.menu_button.triggered.connect(self.create_settings_window)
-        mw.form.menuTools.addAction(self.menu_button)
 
     def enable_checkbox_change_state(self, state, checkbox):
         did = checkbox.property("did")
@@ -121,6 +112,7 @@ class GUI:
         return decks_group_box
 
     def create_settings_window(self):
+        self.logger.info("create_settings_window")
         dlg = QDialog()
         dlg.setWindowTitle("Auto New Adjuster")
         window_layout = QVBoxLayout()

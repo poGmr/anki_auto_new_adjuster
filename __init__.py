@@ -8,6 +8,8 @@ from .manager import Manager
 from .addon_config import AddonConfig
 from .gui import GUI
 from typing import Literal
+from PyQt6.QtGui import QAction
+from aqt import mw
 
 
 def initialize_logger():
@@ -26,36 +28,37 @@ def initialize_logger():
 def profile_did_open():
     global add_on_config
     global manager
+    global menu_button
     global gui_menu
     logger.debug("#")
     logger.debug("################################### profile_did_open ###################################")
     logger.info("#")
     add_on_config = AddonConfig(logger=logger)
     manager = Manager(logger, add_on_config)
-    manager.update_all_decks()
     gui_menu = GUI(logger, add_on_config)
-    gui_hooks.profile_did_open.append(gui_menu.add_menu_button)
+    menu_button = QAction("Auto New Adjuster", mw)
+    menu_button.triggered.connect(manager.update_all_decks)
+    menu_button.triggered.connect(gui_menu.create_settings_window)
+    mw.form.menuTools.addAction(menu_button)
 
 
 def profile_will_close():
     global add_on_config
+    global manager
+    global menu_button
     global gui_menu
     logger.debug("#")
     logger.debug("################################### profile_will_close ###################################")
     logger.debug("#")
-    gui_hooks.profile_did_open.remove(gui_menu.add_menu_button)
-    gui_menu.__exit__()
+    manager.update_all_decks()
+    mw.form.menuTools.removeAction(menu_button)
+    menu_button.triggered.disconnect(gui_menu.create_settings_window)
+    menu_button.triggered.disconnect(manager.update_all_decks)
+    del menu_button
     del gui_menu
+    del manager
     add_on_config.__exit__()
     del add_on_config
-
-
-def sync_did_finish():
-    global manager
-    logger.debug("#")
-    logger.debug("################################### sync_did_finish ###################################")
-    logger.debug("#")
-    manager.update_all_decks()
 
 
 def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2, 3, 4]):
@@ -71,17 +74,17 @@ def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2,
 
 
 def reviewer_will_end():
-    logger.debug("#")
-    logger.debug("################################### reviewer_will_end ###################################")
-    logger.debug("#")
+    global manager
+    manager.update_all_decks()
 
 
 logger = initialize_logger()
 add_on_config: AddonConfig
 manager: Manager
+menu_button: QAction
 gui_menu: GUI
 
-gui_hooks.sync_did_finish.append(sync_did_finish)
 gui_hooks.profile_did_open.append(profile_did_open)
 gui_hooks.reviewer_did_answer_card.append(reviewer_did_answer_card)
 gui_hooks.profile_will_close.append(profile_will_close)
+gui_hooks.reviewer_will_end.append(reviewer_will_end)
