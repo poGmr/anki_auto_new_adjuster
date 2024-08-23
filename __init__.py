@@ -1,4 +1,5 @@
-from aqt import gui_hooks
+from aqt.gui_hooks import profile_did_open, profile_will_close, reviewer_did_answer_card, reviewer_will_end
+from aqt.gui_hooks import addon_config_editor_will_display_json, addon_config_editor_will_save_json
 from aqt.reviewer import Reviewer
 from anki.cards import Card
 import logging
@@ -10,6 +11,7 @@ from .gui import GUI
 from typing import Literal
 from PyQt6.QtGui import QAction
 from aqt import mw
+import json
 
 
 def initialize_logger():
@@ -25,6 +27,7 @@ def initialize_logger():
     return result
 
 
+@profile_did_open.append
 def profile_did_open():
     global add_on_config
     global manager
@@ -42,6 +45,7 @@ def profile_did_open():
     mw.form.menuTools.addAction(menu_button)
 
 
+@profile_will_close.append
 def profile_will_close():
     global add_on_config
     global manager
@@ -61,6 +65,7 @@ def profile_will_close():
     del add_on_config
 
 
+@reviewer_did_answer_card.append
 def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2, 3, 4]):
     global manager
     logger.debug("#")
@@ -73,18 +78,31 @@ def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2,
     manager.update_deck(did=did)
 
 
+@reviewer_will_end.append
 def reviewer_will_end():
     global manager
     manager.update_all_decks()
 
+
+# @addon_config_editor_will_save_json.append
+# def addon_config_editor_will_save_json(text: str):
+#     global logger
+#     global add_on_config
+#     add_on_config.raw = json.loads(text)
+#     return text
+#
+#
+# @addon_config_editor_will_display_json.append
+# def addon_config_editor_will_display_json(text: str):
+#     global logger
+#     global add_on_config
+#     return json.dumps(add_on_config.raw, indent=4)
+
+
+############################################################################################
 
 logger = initialize_logger()
 add_on_config: AddonConfig
 manager: Manager
 menu_button: QAction
 gui_menu: GUI
-
-gui_hooks.profile_did_open.append(profile_did_open)
-gui_hooks.reviewer_did_answer_card.append(reviewer_did_answer_card)
-gui_hooks.profile_will_close.append(profile_will_close)
-gui_hooks.reviewer_will_end.append(reviewer_will_end)

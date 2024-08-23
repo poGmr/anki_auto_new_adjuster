@@ -1,10 +1,7 @@
-from PyQt6.QtWidgets import QDialog, QLabel, QCheckBox, QGridLayout, QGroupBox, QVBoxLayout, \
-    QDoubleSpinBox, QSpinBox
-
+from PyQt6.QtWidgets import QDialog, QLabel, QCheckBox, QGridLayout, QGroupBox, QVBoxLayout
 from PyQt6.QtCore import Qt
 import logging
 from .addon_config import AddonConfig
-from aqt import mw
 
 
 class GUI:
@@ -112,7 +109,6 @@ class GUI:
         return decks_group_box
 
     def create_settings_window(self):
-        self.logger.info("create_settings_window")
         dlg = QDialog()
         dlg.setWindowTitle("Auto New Adjuster")
         window_layout = QVBoxLayout()

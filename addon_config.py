@@ -59,7 +59,8 @@ class AddonConfig:
             deck_info = mw.col.decks.get(d_id)
             if deck_info['dyn'] == 1:
                 continue
-
+            if "::" in deck_info["name"]:
+                continue
             if d_id not in self.raw["decks"]:
                 self.raw["decks"][d_id] = {
                     "name": deck.name,
@@ -79,6 +80,8 @@ class AddonConfig:
             d_id = str(deck.id)
             deck_info = mw.col.decks.get(d_id)
             if deck_info['dyn'] == 1:
+                continue
+            if "::" in deck_info["name"]:
                 continue
             if d_id in self.raw["decks"]:
                 if self.raw["decks"][d_id]["name"] != deck.name:
