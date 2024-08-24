@@ -1,5 +1,4 @@
 from aqt.gui_hooks import profile_did_open, profile_will_close, reviewer_did_answer_card, reviewer_will_end
-from aqt.gui_hooks import addon_config_editor_will_display_json, addon_config_editor_will_save_json
 from aqt.reviewer import Reviewer
 from anki.cards import Card
 import logging
@@ -11,7 +10,6 @@ from .gui import GUI
 from typing import Literal
 from PyQt6.QtGui import QAction
 from aqt import mw
-import json
 
 
 def initialize_logger():
@@ -68,6 +66,7 @@ def profile_will_close():
 @reviewer_did_answer_card.append
 def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2, 3, 4]):
     global manager
+    global logger
     logger.debug("#")
     logger.debug("################################### reviewer_did_answer_card ###################################")
     logger.debug("#")
@@ -81,22 +80,11 @@ def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2,
 @reviewer_will_end.append
 def reviewer_will_end():
     global manager
+    global logger
+    logger.debug("#")
+    logger.debug("################################### reviewer_did_answer_card ###################################")
+    logger.debug("#")
     manager.update_all_decks()
-
-
-# @addon_config_editor_will_save_json.append
-# def addon_config_editor_will_save_json(text: str):
-#     global logger
-#     global add_on_config
-#     add_on_config.raw = json.loads(text)
-#     return text
-#
-#
-# @addon_config_editor_will_display_json.append
-# def addon_config_editor_will_display_json(text: str):
-#     global logger
-#     global add_on_config
-#     return json.dumps(add_on_config.raw, indent=4)
 
 
 ############################################################################################

@@ -32,7 +32,6 @@ class AddonConfig:
         self.logger.debug("_save")
         profile_folder = mw.pm.profileFolder()
         config_path = os.path.join(profile_folder, "auto_new_adjuster_config.json")
-
         with open(config_path, "w") as f:
             json.dump(self.raw, f, indent=4)
 
@@ -58,8 +57,10 @@ class AddonConfig:
             d_id = str(deck.id)
             deck_info = mw.col.decks.get(d_id)
             if deck_info['dyn'] == 1:
+                # No filter decks
                 continue
             if "::" in deck_info["name"]:
+                # No subdecks
                 continue
             if d_id not in self.raw["decks"]:
                 self.raw["decks"][d_id] = {
