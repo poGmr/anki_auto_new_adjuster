@@ -27,7 +27,6 @@ class Deck:
         self.id: str = str(self.raw_data["id"])
         self.name: str = self.raw_data["name"]
         self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id, add_on_config=add_on_config)
-        self.update_status()
 
     def update_status(self) -> None:
         self._update_young_current_difficulty_sum()
