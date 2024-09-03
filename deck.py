@@ -70,7 +70,7 @@ class Deck:
         if all_cards_count != 0:
             todays_user_focus_level = round(1.0 - (all_again_cards_count / all_cards_count), 2)
         else:
-            todays_user_focus_level = 0.90
+            todays_user_focus_level = 1.00
         self.logger.debug(f"[{self.name}] Today's user focus level: {round(todays_user_focus_level * 100)}%")
         self.add_on_config.set_deck_state(did=self.id, key="todays_user_focus_level", value=todays_user_focus_level)
 
