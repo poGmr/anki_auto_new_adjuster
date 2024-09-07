@@ -6,6 +6,7 @@ from .addon_config import AddonConfig
 
 class GUI:
     def __init__(self, logger: logging.Logger, add_on_config: AddonConfig):
+        # TODO: add TextBox to show todays logging
         self.logger: logging.Logger = logger
         self.add_on_config: AddonConfig = add_on_config
 

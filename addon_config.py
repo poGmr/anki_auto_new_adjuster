@@ -45,10 +45,11 @@ class AddonConfig:
         self.logger.debug("_add_new_decks_to_add_on_config")
         if "global" not in self.raw:
             self.raw["global"] = {}
-        self.raw["global"]["low_focus_level"] = 0.85
-        self.raw["global"]["high_focus_level"] = 0.95
-        self.raw["global"]["lowest_young_max_difficulty_sum"] = 21
-        self.raw["global"]["highest_young_max_difficulty_sum"] = 210
+            self.raw["global"]["low_focus_level"] = 0.85
+            self.raw["global"]["high_focus_level"] = 0.95
+            self.raw["global"]["lowest_young_max_difficulty_sum"] = 21
+            self.raw["global"]["highest_young_max_difficulty_sum"] = 210
+            self.raw["global"]["logger_level"] = "info"
 
         if "decks" not in self.raw:
             self.raw["decks"]: dict = {}
@@ -104,7 +105,7 @@ class AddonConfig:
 
         for addon_deck_id in addon_decks:
             if addon_deck_id not in anki_deck_ids:
-                self.logger.debug(
+                self.logger.warning(
                     f"Deck: {self.raw['decks'][addon_deck_id]['name']} has been removed from addon config.")
                 del self.raw["decks"][addon_deck_id]
 
