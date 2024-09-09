@@ -54,6 +54,8 @@ class Deck:
             return
         if get_global_count_still_in_queue() > 0:
             self.add_on_config.set_deck_state(did=self.id, key="status", value="WAIT")
+            self.deck_config.set_new_count(new_count=0)
+            self.logger.debug(f"[{self.name}] Due cards still in review queue in other decks - no action to take.")
             return
         self.add_on_config.set_deck_state(did=self.id, key="status", value="NEW")
         self.deck_config.set_new_count(new_count=999)
