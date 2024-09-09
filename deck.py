@@ -8,9 +8,11 @@ from .addon_config import AddonConfig
 
 def get_card_difficulty(card_id: int) -> float:
     query = f"SELECT json_extract(data, '$.d') FROM cards WHERE id={card_id}"
-    d = mw.col.db.all(query)[0][0]
-    d = (d - 1) / 9
-    return d
+    init_diff: float | None = mw.col.db.all(query)[0][0]
+    if init_diff is None:
+        return 0.5
+    else:
+        return (init_diff - 1) / 9
 
 
 def get_global_count_still_in_queue() -> int:
@@ -54,6 +56,8 @@ class Deck:
             return
         if get_global_count_still_in_queue() > 0:
             self.add_on_config.set_deck_state(did=self.id, key="status", value="WAIT")
+            self.deck_config.set_new_count(new_count=0)
+            self.logger.debug(f"[{self.name}] Due cards still in review queue in other decks - no action to take.")
             return
         self.add_on_config.set_deck_state(did=self.id, key="status", value="NEW")
         self.deck_config.set_new_count(new_count=999)
