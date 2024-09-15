@@ -141,7 +141,9 @@ class AddonConfig:
             self.logger.error(f"set_deck_state error")
 
     def get_decks_ids(self) -> list[str]:
-        return sorted(list(self.raw["decks"].keys()))
+        # return sorted(list(self.raw["decks"].keys()))
+        # Return keys but sort then via name of the deck
+        return sorted(self.raw["decks"].keys(), key=lambda deck_id: self.raw["decks"][deck_id]["name"])
 
     def get_duplicated_config_ids(self) -> list[str]:
         config_ids: list = []
