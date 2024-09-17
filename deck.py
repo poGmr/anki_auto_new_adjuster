@@ -34,14 +34,10 @@ class Deck:
         self._update_young_current_difficulty_sum()
         self._update_todays_user_focus_level()
         if self.deck_config.id in self.add_on_config.get_duplicated_config_ids():
-            self.add_on_config.set_deck_state(did=self.id, key="status", value="ERROR")
-            self.logger.error(f"[{self.name}] Config '{self.deck_config.name}' is used by other deck.")
+            self._set_error_status()
             return
         if self._get_count_still_in_queue() > 0:
-            self.add_on_config.set_deck_state(did=self.id, key="status", value="REVIEW")
-            self.add_on_config.set_deck_state(did=self.id, key="new_done", value=0)
-            self.deck_config.set_new_count(new_count=0)
-            self.logger.debug(f"[{self.name}] Cards still in review queue - no action to take.")
+            self._set_review_status()
             return
 
         self._update_deck_difficulty()
@@ -51,14 +47,33 @@ class Deck:
                                                                          key="young_current_difficulty_sum")
         young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
         if young_current_difficulty_sum >= young_max_difficulty_sum:
-            self.add_on_config.set_deck_state(did=self.id, key="status", value="DONE")
-            self.deck_config.set_new_count(new_count=0)
+            self._set_done_status()
             return
         if get_global_count_still_in_queue() > 0:
-            self.add_on_config.set_deck_state(did=self.id, key="status", value="WAIT")
-            self.deck_config.set_new_count(new_count=0)
-            self.logger.debug(f"[{self.name}] Due cards still in review queue in other decks - no action to take.")
+            self._set_wait_status()
             return
+        self._set_new_status()
+
+    def _set_error_status(self) -> None:
+        self.add_on_config.set_deck_state(did=self.id, key="status", value="ERROR")
+        self.logger.error(f"[{self.name}] Config '{self.deck_config.name}' is used by other deck.")
+
+    def _set_review_status(self) -> None:
+        self.add_on_config.set_deck_state(did=self.id, key="status", value="REVIEW")
+        self.add_on_config.set_deck_state(did=self.id, key="new_done", value=0)
+        self.deck_config.set_new_count(new_count=0)
+        self.logger.debug(f"[{self.name}] Cards still in review queue - no action to take.")
+
+    def _set_done_status(self) -> None:
+        self.add_on_config.set_deck_state(did=self.id, key="status", value="DONE")
+        self.deck_config.set_new_count(new_count=0)
+
+    def _set_wait_status(self) -> None:
+        self.add_on_config.set_deck_state(did=self.id, key="status", value="WAIT")
+        self.deck_config.set_new_count(new_count=0)
+        self.logger.debug(f"[{self.name}] Due cards still in review queue in other decks - no action to take.")
+
+    def _set_new_status(self) -> None:
         self.add_on_config.set_deck_state(did=self.id, key="status", value="NEW")
         self.deck_config.set_new_count(new_count=999)
 
@@ -107,12 +122,7 @@ class Deck:
         return cards_count
 
     def _update_deck_difficulty(self) -> None:
-        low_young_max_difficulty = self.add_on_config.get_global_state(key="lowest_young_max_difficulty_sum")
-        high_young_max_difficulty = self.add_on_config.get_global_state(key="highest_young_max_difficulty_sum")
-        low_focus_level = self.add_on_config.get_global_state(key="low_focus_level")
-        high_focus_level = self.add_on_config.get_global_state(key="high_focus_level")
         last_updated = self.add_on_config.get_deck_state(did=self.id, key="last_updated")
-        young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
         cut_off_time = mw.col.sched.day_cutoff
         if cut_off_time - last_updated <= 60 * 60 * 24:
             logger_output = f"[{self.name}] Young max difficulty sum has been already checked today."
@@ -120,6 +130,11 @@ class Deck:
             self.logger.debug(logger_output)
             return
 
+        low_young_max_difficulty = self.add_on_config.get_global_state(key="lowest_young_max_difficulty_sum")
+        high_young_max_difficulty = self.add_on_config.get_global_state(key="highest_young_max_difficulty_sum")
+        low_focus_level = self.add_on_config.get_global_state(key="low_focus_level")
+        high_focus_level = self.add_on_config.get_global_state(key="high_focus_level")
+        young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
         todays_user_focus_level = self.add_on_config.get_deck_state(did=self.id, key="todays_user_focus_level")
         self.logger.info(f"[{self.name}] Today's user focus level: {round(todays_user_focus_level * 100)}%")
         if todays_user_focus_level < low_focus_level:
