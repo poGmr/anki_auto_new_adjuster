@@ -137,18 +137,21 @@ class Deck:
         young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
         todays_user_focus_level = self.add_on_config.get_deck_state(did=self.id, key="todays_user_focus_level")
         self.logger.info(f"[{self.name}] Today's user focus level: {round(todays_user_focus_level * 100)}%")
+        # DOWN: \u2193, UP: \u2191
         if todays_user_focus_level < low_focus_level:
             young_max_difficulty_sum = max(low_young_max_difficulty, young_max_difficulty_sum - 1)
             self.add_on_config.set_deck_state(did=self.id, key="young_max_difficulty_sum",
                                               value=young_max_difficulty_sum)
             self.logger.info(f"[{self.name}] Young max difficulty sum \u2193 to {young_max_difficulty_sum}.")
-
+            self.add_on_config.set_deck_state(did=self.id, key="trend", value="\u2193")
         if low_focus_level <= todays_user_focus_level < high_focus_level:
             self.logger.info(f"[{self.name}] No need to \u2191\u2193 young max difficulty sum.")
+            self.add_on_config.set_deck_state(did=self.id, key="trend", value="\u2191\u2193")
 
         if todays_user_focus_level >= high_focus_level:
             young_max_difficulty_sum = min(high_young_max_difficulty, young_max_difficulty_sum + 1)
             self.logger.info(f"[{self.name}] Young max difficulty sum \u2191 to {young_max_difficulty_sum}.")
             self.add_on_config.set_deck_state(did=self.id, key="young_max_difficulty_sum",
                                               value=young_max_difficulty_sum)
+            self.add_on_config.set_deck_state(did=self.id, key="trend", value="\u2191")
         self.add_on_config.set_deck_state(did=self.id, key="last_updated", value=int(time()))
