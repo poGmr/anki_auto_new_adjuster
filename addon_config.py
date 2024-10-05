@@ -43,15 +43,13 @@ class AddonConfig:
 
     def _add_new_decks_to_add_on_config(self):
         self.logger.debug("_add_new_decks_to_add_on_config")
-        if "global" not in self.raw:
-            self.raw["global"] = {}
-            self.raw["global"]["low_focus_level"] = 0.85
-            self.raw["global"]["high_focus_level"] = 0.95
-            self.raw["global"]["lowest_young_max_difficulty_sum"] = 1
-            self.raw["global"]["highest_young_max_difficulty_sum"] = 210
-
-        if "decks" not in self.raw:
-            self.raw["decks"]: dict = {}
+        self.raw.setdefault("global", {})
+        self.raw["global"].setdefault("low_focus_level", 0.85)
+        self.raw["global"].setdefault("high_focus_level", 0.95)
+        self.raw["global"].setdefault("lowest_young_max_difficulty_sum", 1)
+        self.raw["global"].setdefault("highest_young_max_difficulty_sum", 210)
+        self.raw["global"].setdefault("new_after_review_all_decks", True)
+        self.raw.setdefault("decks", {})
 
         for deck in mw.col.decks.all_names_and_ids():
             d_id = str(deck.id)
@@ -62,18 +60,17 @@ class AddonConfig:
             if "::" in deck_info["name"]:
                 # No subdecks
                 continue
-            if d_id not in self.raw["decks"]:
-                self.raw["decks"][d_id] = {
-                    "name": deck.name,
-                    "enabled": False,
-                    "young_max_difficulty_sum": 0,
-                    "last_updated": 0,
-                    "young_current_difficulty_sum": 0,
-                    "new_done": 0,
-                    "todays_user_focus_level": 1.0,
-                    "config_id": deck_info['conf'],
-                    "status": "-"
-                }
+            self.raw["decks"].setdefault(d_id, {})
+            self.raw["decks"][d_id].setdefault("name", deck.name)
+            self.raw["decks"][d_id].setdefault("enabled", False)
+            self.raw["decks"][d_id].setdefault("young_max_difficulty_sum", 0)
+            self.raw["decks"][d_id].setdefault("last_updated", 0)
+            self.raw["decks"][d_id].setdefault("young_current_difficulty_sum", 0)
+            self.raw["decks"][d_id].setdefault("new_done", 0)
+            self.raw["decks"][d_id].setdefault("todays_user_focus_level", 1.0)
+            self.raw["decks"][d_id].setdefault("config_id", deck_info['conf'])
+            self.raw["decks"][d_id].setdefault("status", "-")
+            self.raw["decks"][d_id].setdefault("trend", "")
 
     def _update_decks_in_add_on_config(self):
         self.logger.debug("_update_decks_in_add_on_config")

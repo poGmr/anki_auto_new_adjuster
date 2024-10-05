@@ -49,7 +49,8 @@ class Deck:
         if young_current_difficulty_sum >= young_max_difficulty_sum:
             self._set_done_status()
             return
-        if get_global_count_still_in_queue() > 0:
+        new_after_review_all_decks = self.add_on_config.get_global_state(key="new_after_review_all_decks")
+        if new_after_review_all_decks and get_global_count_still_in_queue() > 0:
             self._set_wait_status()
             return
         self._set_new_status()
