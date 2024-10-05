@@ -4,11 +4,33 @@ import logging
 from .addon_config import AddonConfig
 
 
+def get_checkbox_css_style() -> str:
+    return """
+                        QCheckBox::indicator {
+                            width: 20px;
+                            height: 20px;
+                        }
+                        QCheckBox::indicator:checked {
+                            background-color: green;
+                        }
+                        QCheckBox::indicator:unchecked {
+                            background-color: red;
+                        }
+                                """
+
+
 class GUI:
     def __init__(self, logger: logging.Logger, add_on_config: AddonConfig):
         # TODO: add TextBox to show todays logging
         self.logger: logging.Logger = logger
         self.add_on_config: AddonConfig = add_on_config
+
+    def change_global_checkbox_state(self, state, checkbox):
+        key = checkbox.property("key")
+        if state == 0 or state == 1:
+            self.add_on_config.set_global_state(key=key, value=False)
+        if state == 2:
+            self.add_on_config.set_global_state(key=key, value=True)
 
     def enable_checkbox_change_state(self, state, checkbox):
         did = checkbox.property("did")
@@ -41,7 +63,17 @@ class GUI:
             str(self.add_on_config.get_global_state(key="highest_young_max_difficulty_sum")))
         global_grid_layout.addWidget(highest_young_max_difficulty_sum, 3, 1, alignment=Qt.AlignmentFlag.AlignLeft)
         ####################################################################################################
+        global_grid_layout.addWidget(QLabel("Show new cards after review all decks"), 4, 0)
+        chb_new_after_review_all_decks = QCheckBox()
+        chb_new_after_review_all_decks.setStyleSheet(get_checkbox_css_style())
+        chb_new_after_review_all_decks.setProperty("key", "new_after_review_all_decks")
+        chb_new_after_review_all_decks.stateChanged.connect(
+            lambda state, checkbox=chb_new_after_review_all_decks: self.change_global_checkbox_state(state, checkbox))
+        chb_new_after_review_all_decks.setChecked(
+            self.add_on_config.get_global_state(key=chb_new_after_review_all_decks.property("key")))
+        global_grid_layout.addWidget(chb_new_after_review_all_decks, 4, 1)
         global_group_box.setLayout(global_grid_layout)
+
         return global_group_box
 
     def get_deck_settings_group_box(self):
@@ -64,18 +96,7 @@ class GUI:
             ####################################################################################################
             enabled = QCheckBox()
             enabled.setProperty("did", did)
-            enabled.setStyleSheet("""
-                        QCheckBox::indicator {
-                            width: 20px;
-                            height: 20px;
-                        }
-                        QCheckBox::indicator:checked {
-                            background-color: green;
-                        }
-                        QCheckBox::indicator:unchecked {
-                            background-color: red;
-                        }
-                                """)
+            enabled.setStyleSheet(get_checkbox_css_style())
             enabled.setChecked(self.add_on_config.get_deck_state(did=did, key="enabled"))
             enabled.stateChanged.connect(
                 lambda state, checkbox=enabled: self.enable_checkbox_change_state(state, checkbox))
