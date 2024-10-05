@@ -47,9 +47,8 @@ class AddonConfig:
             self.raw["global"] = {}
             self.raw["global"]["low_focus_level"] = 0.85
             self.raw["global"]["high_focus_level"] = 0.95
-            self.raw["global"]["lowest_young_max_difficulty_sum"] = 21
+            self.raw["global"]["lowest_young_max_difficulty_sum"] = 1
             self.raw["global"]["highest_young_max_difficulty_sum"] = 210
-            self.raw["global"]["logger_level"] = "info"
 
         if "decks" not in self.raw:
             self.raw["decks"]: dict = {}
@@ -67,11 +66,11 @@ class AddonConfig:
                 self.raw["decks"][d_id] = {
                     "name": deck.name,
                     "enabled": False,
-                    "young_max_difficulty_sum": self.raw["global"]["lowest_young_max_difficulty_sum"],
+                    "young_max_difficulty_sum": 0,
                     "last_updated": 0,
                     "young_current_difficulty_sum": 0,
                     "new_done": 0,
-                    "todays_user_focus_level": 0.9,
+                    "todays_user_focus_level": 1.0,
                     "config_id": deck_info['conf'],
                     "status": "-"
                 }

@@ -134,8 +134,16 @@ class Deck:
         high_young_max_difficulty = self.add_on_config.get_global_state(key="highest_young_max_difficulty_sum")
         low_focus_level = self.add_on_config.get_global_state(key="low_focus_level")
         high_focus_level = self.add_on_config.get_global_state(key="high_focus_level")
-        young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
+
         todays_user_focus_level = self.add_on_config.get_deck_state(did=self.id, key="todays_user_focus_level")
+        young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
+        young_current_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
+                                                                         key="young_current_difficulty_sum")
+        if young_max_difficulty_sum == 0:
+            # new deck in addon config
+            young_max_difficulty_sum = young_current_difficulty_sum
+            self.add_on_config.set_deck_state(did=self.id, key="young_max_difficulty_sum",
+                                              value=young_max_difficulty_sum)
         self.logger.info(f"[{self.name}] Today's user focus level: {round(todays_user_focus_level * 100)}%")
         # DOWN: \u2193, UP: \u2191
         if todays_user_focus_level < low_focus_level:
