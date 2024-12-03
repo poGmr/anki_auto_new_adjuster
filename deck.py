@@ -31,6 +31,7 @@ class Deck:
         self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id, add_on_config=add_on_config)
 
     def update_status(self) -> None:
+        self._update_todays_difficulty_avg()
         self._update_young_current_difficulty_sum()
         self._update_todays_user_focus_level()
         if self.deck_config.id in self.add_on_config.get_duplicated_config_ids():
@@ -102,6 +103,12 @@ class Deck:
         ids = mw.col.find_cards(query)
         return ids
 
+    def _get_todays_cards_ids(self) -> Sequence:
+        query = f'"deck:{self.name}" AND '
+        query += f'("prop:due=0")'
+        ids = mw.col.find_cards(query)
+        return ids
+
     def _update_new_done_cards(self):
         query = f'"deck:{self.name}" AND "introduced:1"'
         count = len(mw.col.find_cards(query))
@@ -115,7 +122,19 @@ class Deck:
         young_current_difficulty_sum = round(young_current_difficulty_sum)
         self.add_on_config.set_deck_state(did=self.id, key="young_current_difficulty_sum",
                                           value=young_current_difficulty_sum)
-        self.logger.debug(f"[{self.name}] Young current difficulty sum: {young_current_difficulty_sum}.")
+        self.logger.debug(f"[{self.name}] Young current difficulty sum: {young_current_difficulty_sum}")
+
+    def _update_todays_difficulty_avg(self) -> None:
+        cards_id = self._get_todays_cards_ids()
+        todays_difficulty_avg = 0.0
+        n = len(cards_id)
+        if n != 0:
+            for card_id in cards_id:
+                todays_difficulty_avg += get_card_difficulty(card_id=card_id)
+            todays_difficulty_avg /= n
+        self.add_on_config.set_deck_state(did=self.id, key="todays_difficulty_avg",
+                                          value=todays_difficulty_avg)
+        self.logger.error(f"[{self.name}] Today difficulty avg: {round(100 * todays_difficulty_avg)}%")
 
     def _get_count_still_in_queue(self) -> int:
         query = f"deck:{self.name} is:due"
