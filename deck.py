@@ -97,7 +97,8 @@ class Deck:
 
     def _get_young_cards_ids(self) -> Sequence:
         query = f'"deck:{self.name}" AND '
-        query += f'("is:review" AND -"is:learn") AND '
+        # query += f'("is:review" AND -"is:learn") AND '
+        query += f'"is:review" AND '
         query += f'"prop:ivl<21" AND '
         query += f'-("is:buried" OR "is:suspended")'
         ids = mw.col.find_cards(query)
@@ -118,7 +119,8 @@ class Deck:
         cards_id = self._get_young_cards_ids()
         young_current_difficulty_sum = 0.0
         for card_id in cards_id:
-            young_current_difficulty_sum += get_card_difficulty(card_id=card_id)
+            young_current_difficulty_sum += get_card_difficulty(
+                card_id=card_id) + 1  # Sum card difficulty and card count (to solve problem with 0% difficulty)
         young_current_difficulty_sum = round(young_current_difficulty_sum)
         self.add_on_config.set_deck_state(did=self.id, key="young_current_difficulty_sum",
                                           value=young_current_difficulty_sum)

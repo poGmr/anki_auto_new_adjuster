@@ -70,10 +70,14 @@ def profile_will_close():
     logger.debug("################################### profile_will_close ###################################")
     logger.debug("#")
     update_all_decks()
-    mw.form.menuTools.removeAction(menu_button)
-    menu_button.triggered.disconnect(gui_menu.create_settings_window)
-    menu_button.triggered.disconnect(update_all_decks)
-    del menu_button
+    try:
+        if menu_button:
+            mw.form.menuTools.removeAction(menu_button)
+            menu_button.triggered.disconnect(gui_menu.create_settings_window)
+            menu_button.triggered.disconnect(update_all_decks)
+            del menu_button
+    except NameError:
+        pass  # menu_button was not defined, ignore
     del gui_menu
     add_on_config.__exit__()
     del add_on_config

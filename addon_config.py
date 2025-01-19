@@ -22,8 +22,12 @@ class AddonConfig:
         profile_folder = mw.pm.profileFolder()
         config_path = os.path.join(profile_folder, "auto_new_adjuster_config.json")
         if os.path.exists(config_path):
-            with open(config_path, "r") as f:
-                config = json.load(f)
+            try:
+                with open(config_path, "r") as f:
+                    config = json.load(f)
+            except json.JSONDecodeError as e:
+                self.logger.error(f"Failed to decode JSON from {config_path}: {e}")
+                config = {}  # Return an empty config or set a default value
         else:
             config = {}
         return config
@@ -47,7 +51,7 @@ class AddonConfig:
         self.raw["global"].setdefault("low_focus_level", 0.85)
         self.raw["global"].setdefault("high_focus_level", 0.95)
         self.raw["global"].setdefault("lowest_young_max_difficulty_sum", 1)
-        self.raw["global"].setdefault("highest_young_max_difficulty_sum", 210)
+        self.raw["global"].setdefault("highest_young_max_difficulty_sum", 240)
         self.raw["global"].setdefault("new_after_review_all_decks", True)
         self.raw.setdefault("decks", {})
 
