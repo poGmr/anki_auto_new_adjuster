@@ -67,7 +67,7 @@ class AddonConfig:
             self.raw["decks"].setdefault(d_id, {})
             self.raw["decks"][d_id].setdefault("name", deck.name)
             self.raw["decks"][d_id].setdefault("enabled", False)
-            self.raw["decks"][d_id].setdefault("young_max_difficulty_sum", 0)
+            self.raw["decks"][d_id].setdefault("young_max_difficulty_sum", 1)
             self.raw["decks"][d_id].setdefault("last_updated", 0)
             self.raw["decks"][d_id].setdefault("young_current_difficulty_sum", 0)
             self.raw["decks"][d_id].setdefault("new_done", 0)

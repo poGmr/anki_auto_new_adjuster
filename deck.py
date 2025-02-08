@@ -81,17 +81,20 @@ class Deck:
 
     def _update_todays_user_focus_level(self) -> None:
         cut_off_time = (mw.col.sched.day_cutoff - (60 * 60 * 24)) * 1000
-        query = f"SELECT count(*), SUM(CASE WHEN revlog.ease = 1 THEN 1 ELSE 0 END) "
+        query = f"SELECT count(*), sum(CASE WHEN revlog.ease = '1' AND cards.type = '2' THEN 1 ELSE 0 END) "
         query += f"FROM revlog JOIN cards ON revlog.cid = cards.id "
         query += f"WHERE revlog.id >= '{cut_off_time}' "
-        query += f"AND cards.did='{self.id}';"
+        query += f"AND cards.ivl >= '1' "
+        query += f"AND cards.did = '{self.id}';"
         result = mw.col.db.all(query)
         all_cards_count = result[0][0]
         all_again_cards_count = result[0][1]
+        self.logger.info(
+            f"[{self.name}] all_cards_count / all_again_cards_count: {all_cards_count} / {all_again_cards_count}")
         if all_cards_count != 0:
             todays_user_focus_level = round(1.0 - (all_again_cards_count / all_cards_count), 2)
         else:
-            todays_user_focus_level = 1.00
+            todays_user_focus_level = 0.90
         self.logger.debug(f"[{self.name}] Today's user focus level: {round(todays_user_focus_level * 100)}%")
         self.add_on_config.set_deck_state(did=self.id, key="todays_user_focus_level", value=todays_user_focus_level)
 
@@ -136,7 +139,7 @@ class Deck:
             todays_difficulty_avg /= n
         self.add_on_config.set_deck_state(did=self.id, key="todays_difficulty_avg",
                                           value=todays_difficulty_avg)
-        self.logger.error(f"[{self.name}] Today difficulty avg: {round(100 * todays_difficulty_avg)}%")
+        self.logger.debug(f"[{self.name}] Today difficulty avg: {round(100 * todays_difficulty_avg)}%")
 
     def _get_count_still_in_queue(self) -> int:
         query = f"deck:{self.name} is:due"
