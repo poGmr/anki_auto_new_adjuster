@@ -4,6 +4,7 @@ import logging
 from .config import DeckConfig
 from time import time
 from .addon_config import AddonConfig
+from anki.consts import QUEUE_TYPE_REV, QUEUE_TYPE_DAY_LEARN_RELEARN
 
 
 def get_card_difficulty(card_id: int) -> float:
@@ -41,7 +42,7 @@ class Deck:
             self._set_review_status()
             return
 
-        self._update_deck_difficulty()
+        # self._update_deck_difficulty()
         self._update_new_done_cards()
 
         young_current_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
@@ -81,15 +82,16 @@ class Deck:
 
     def _update_todays_user_focus_level(self) -> None:
         cut_off_time = (mw.col.sched.day_cutoff - (60 * 60 * 24)) * 1000
-        query = f"SELECT count(*), sum(CASE WHEN revlog.ease = '1' AND cards.type = '2' THEN 1 ELSE 0 END) "
+        query = f"SELECT count(*), sum(CASE WHEN revlog.ease = '1' THEN 1 ELSE 0 END) "
         query += f"FROM revlog JOIN cards ON revlog.cid = cards.id "
-        query += f"WHERE revlog.id >= '{cut_off_time}' "
-        query += f"AND cards.ivl >= '1' "
+        query += f"WHERE revlog.id > '{cut_off_time}' "
+        query += f"AND cards.queue in ('{QUEUE_TYPE_REV}','{QUEUE_TYPE_DAY_LEARN_RELEARN}') "
         query += f"AND cards.did = '{self.id}';"
+
         result = mw.col.db.all(query)
         all_cards_count = result[0][0]
         all_again_cards_count = result[0][1]
-        self.logger.info(
+        self.logger.debug(
             f"[{self.name}] all_cards_count / all_again_cards_count: {all_cards_count} / {all_again_cards_count}")
         if all_cards_count != 0:
             todays_user_focus_level = round(1.0 - (all_again_cards_count / all_cards_count), 2)
@@ -123,7 +125,7 @@ class Deck:
         young_current_difficulty_sum = 0.0
         for card_id in cards_id:
             young_current_difficulty_sum += get_card_difficulty(
-                card_id=card_id) + 1  # Sum card difficulty and card count (to solve problem with 0% difficulty)
+                card_id=card_id) + 1.0  # Sum card difficulty and card count (to solve problem with 0% difficulty)
         young_current_difficulty_sum = round(young_current_difficulty_sum)
         self.add_on_config.set_deck_state(did=self.id, key="young_current_difficulty_sum",
                                           value=young_current_difficulty_sum)
