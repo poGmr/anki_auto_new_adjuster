@@ -13,8 +13,6 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 from aqt import mw
-from aqt.deckbrowser import DeckBrowser, DeckBrowserContent
-import re
 
 
 def update_all_decks() -> None:
