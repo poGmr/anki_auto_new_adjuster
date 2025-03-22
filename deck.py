@@ -2,9 +2,7 @@ from aqt import mw
 from collections.abc import Sequence
 import logging
 from .config import DeckConfig
-from time import time
 from .addon_config import AddonConfig
-from anki.consts import QUEUE_TYPE_REV, QUEUE_TYPE_DAY_LEARN_RELEARN
 
 
 def get_card_difficulty(card_id: int) -> float:
@@ -32,7 +30,6 @@ class Deck:
         self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id, add_on_config=add_on_config)
 
     def update_status(self) -> None:
-        self._update_todays_difficulty_avg()
         self._update_young_current_difficulty_sum()
         if self.deck_config.id in self.add_on_config.get_duplicated_config_ids():
             self._set_error_status()
@@ -40,14 +37,12 @@ class Deck:
         if self._get_count_still_in_queue() > 0:
             self._set_review_status()
             return
-
-        # self._update_deck_difficulty()
         self._update_new_done_cards()
 
         young_current_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
                                                                          key="young_current_difficulty_sum")
         young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
-        if young_current_difficulty_sum >= young_max_difficulty_sum:
+        if (young_current_difficulty_sum >= young_max_difficulty_sum) or (self._check_if_any_new_exist() is False):
             self._set_done_status()
             return
         new_after_review_all_decks = self.add_on_config.get_global_state(key="new_after_review_all_decks")
@@ -94,7 +89,7 @@ class Deck:
         ids = mw.col.find_cards(query)
         return ids
 
-    def _update_new_done_cards(self):
+    def _update_new_done_cards(self) -> None:
         query = f'"deck:{self.name}" AND "introduced:1"'
         count = len(mw.col.find_cards(query))
         self.add_on_config.set_deck_state(did=self.id, key="new_done", value=count)
@@ -110,19 +105,16 @@ class Deck:
                                           value=young_current_difficulty_sum)
         self.logger.debug(f"[{self.name}] Young current difficulty sum: {young_current_difficulty_sum}")
 
-    def _update_todays_difficulty_avg(self) -> None:
-        cards_id = self._get_todays_cards_ids()
-        todays_difficulty_avg = 0.0
-        n = len(cards_id)
-        if n != 0:
-            for card_id in cards_id:
-                todays_difficulty_avg += get_card_difficulty(card_id=card_id)
-            todays_difficulty_avg /= n
-        self.add_on_config.set_deck_state(did=self.id, key="todays_difficulty_avg",
-                                          value=todays_difficulty_avg)
-        self.logger.debug(f"[{self.name}] Today difficulty avg: {round(100 * todays_difficulty_avg)}%")
-
     def _get_count_still_in_queue(self) -> int:
         query = f"deck:{self.name} is:due"
         cards_count = len(mw.col.find_cards(query))
         return cards_count
+
+    def _check_if_any_new_exist(self) -> bool:
+        query = f' deck:{self.name} "is:new"AND -("is:buried" OR "is:suspended")'
+        cards_count = len(mw.col.find_cards(query))
+        if cards_count > 0:
+            return True
+        else:
+            return False
+        pass
