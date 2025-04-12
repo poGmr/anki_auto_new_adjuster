@@ -39,12 +39,19 @@ class Deck:
             return
         self._update_new_done_cards()
 
+        if self._check_if_any_new_exist() is False:
+            self._set_no_new_status()
+            return
+
         young_current_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
                                                                          key="young_current_difficulty_sum")
         young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
-        if (young_current_difficulty_sum >= young_max_difficulty_sum) or (self._check_if_any_new_exist() is False):
-            self._set_done_status()
-            return
+        if young_current_difficulty_sum >= young_max_difficulty_sum:
+            if self._get_today_rated() > 0:
+                self._set_done_status()
+                return
+            else:
+                pass  # User should do minimum 1 due or new card every day.
         new_after_review_all_decks = self.add_on_config.get_global_state(key="new_after_review_all_decks")
         if new_after_review_all_decks and get_global_count_still_in_queue() > 0:
             self._set_wait_status()
@@ -65,6 +72,10 @@ class Deck:
         self.add_on_config.set_deck_state(did=self.id, key="status", value="DONE")
         self.deck_config.set_new_count(new_count=0)
 
+    def _set_no_new_status(self) -> None:
+        self.add_on_config.set_deck_state(did=self.id, key="status", value="NO NEW")
+        self.deck_config.set_new_count(new_count=0)
+
     def _set_wait_status(self) -> None:
         self.add_on_config.set_deck_state(did=self.id, key="status", value="WAIT")
         self.deck_config.set_new_count(new_count=0)
@@ -76,21 +87,19 @@ class Deck:
 
     def _get_young_cards_ids(self) -> Sequence:
         query = f'"deck:{self.name}" AND '
-        # query += f'("is:review" AND -"is:learn") AND '
-        query += f'"is:review" AND '
-        query += f'"prop:ivl<21" AND '
-        query += f'-("is:buried" OR "is:suspended")'
+        query += '("is:review" OR "is:learn") AND '
+        query += '"prop:ivl<21" AND '
+        query += '-("is:buried" OR "is:suspended")'
         ids = mw.col.find_cards(query)
         return ids
 
     def _get_todays_cards_ids(self) -> Sequence:
-        query = f'"deck:{self.name}" AND '
-        query += f'("prop:due=0")'
+        query = f'"deck:{self.name}" AND prop:due=0'
         ids = mw.col.find_cards(query)
         return ids
 
     def _update_new_done_cards(self) -> None:
-        query = f'"deck:{self.name}" AND "introduced:1"'
+        query = f'"deck:{self.name}" AND introduced:1'
         count = len(mw.col.find_cards(query))
         self.add_on_config.set_deck_state(did=self.id, key="new_done", value=count)
 
@@ -106,7 +115,12 @@ class Deck:
         self.logger.debug(f"[{self.name}] Young current difficulty sum: {young_current_difficulty_sum}")
 
     def _get_count_still_in_queue(self) -> int:
-        query = f"deck:{self.name} is:due"
+        query = f"deck:{self.name} AND is:due"
+        cards_count = len(mw.col.find_cards(query))
+        return cards_count
+
+    def _get_today_rated(self) -> int:
+        query = f"deck:{self.name} AND rated:1"
         cards_count = len(mw.col.find_cards(query))
         return cards_count
 
