@@ -109,7 +109,7 @@ class Deck:
         for card_id in cards_id:
             young_current_difficulty_sum += get_card_difficulty(
                 card_id=card_id) + 1.0  # Sum card difficulty and card count (to solve problem with 0% difficulty)
-        young_current_difficulty_sum = round(young_current_difficulty_sum)
+        young_current_difficulty_sum = round(young_current_difficulty_sum / 2.0)
         self.add_on_config.set_deck_state(did=self.id, key="young_current_difficulty_sum",
                                           value=young_current_difficulty_sum)
         self.logger.debug(f"[{self.name}] Young current difficulty sum: {young_current_difficulty_sum}")
