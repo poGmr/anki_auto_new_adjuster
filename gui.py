@@ -95,6 +95,8 @@ class GUI:
         decks_grid_layout.addWidget(QLabel("STATUS"), 0, 6, alignment=Qt.AlignmentFlag.AlignCenter)
 
         i = 1
+        total_set = 0
+        total_young = 0
         for did in self.add_on_config.get_decks_ids():
             ####################################################################################################
             deck_name = QLabel(self.add_on_config.get_deck_state(did=did, key="name"))
@@ -113,7 +115,7 @@ class GUI:
             ####################################################################################################
             young_current_difficulty_sum = QLabel(
                 str(self.add_on_config.get_deck_state(did=did, key="young_current_difficulty_sum")))
-
+            total_young += int(young_current_difficulty_sum.text())
             decks_grid_layout.addWidget(young_current_difficulty_sum, i, 2, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             new_done = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_done")))
@@ -131,6 +133,7 @@ class GUI:
             # trend = str(self.add_on_config.get_deck_state(did=did, key="trend"))
             ####################################################################################################
             young_max_difficulty_sum = str(self.add_on_config.get_deck_state(did=did, key="young_max_difficulty_sum"))
+            total_set += int(young_max_difficulty_sum)
             young_max_difficulty_sum_spin = QSpinBox()
             young_max_difficulty_sum_spin.setRange(0, 1000)
             young_max_difficulty_sum_spin.setValue(int(young_max_difficulty_sum))
@@ -141,6 +144,10 @@ class GUI:
             decks_grid_layout.addWidget(young_max_difficulty_sum_spin, i, 3, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             i += 1
+        ### ADD SUMMARY LINE
+        decks_grid_layout.addWidget(QLabel("TOTAL"), i, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        decks_grid_layout.addWidget(QLabel(str(total_young)), i, 2, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel(str(total_set)), i, 3, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_group_box = QGroupBox("DECKS")
         decks_group_box.setLayout(decks_grid_layout)
         return decks_group_box
