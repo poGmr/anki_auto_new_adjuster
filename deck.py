@@ -47,11 +47,8 @@ class Deck:
                                                                          key="young_current_difficulty_sum")
         young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
         if young_current_difficulty_sum >= young_max_difficulty_sum:
-            if self._get_today_rated() > 0:
-                self._set_done_status()
-                return
-            else:
-                pass  # User should do minimum 1 due or new card every day.
+            self._set_done_status()
+            return
         new_after_review_all_decks = self.add_on_config.get_global_state(key="new_after_review_all_decks")
         if new_after_review_all_decks and get_global_count_still_in_queue() > 0:
             self._set_wait_status()
@@ -125,7 +122,7 @@ class Deck:
         return cards_count
 
     def _check_if_any_new_exist(self) -> bool:
-        query = f' deck:{self.name} "is:new"AND -("is:buried" OR "is:suspended")'
+        query = f' deck:{self.name} "is:new" AND -("is:buried" OR "is:suspended")'
         cards_count = len(mw.col.find_cards(query))
         if cards_count > 0:
             return True
