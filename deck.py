@@ -107,7 +107,7 @@ class Deck:
         query += '"prop:ivl<21" AND '
         query += '-("is:buried" OR "is:suspended")'
         ids = mw.col.find_cards(query)
-        self.logger.info(f"[{self.name}] Today's young cards count: {len(ids)}")
+        self.logger.debug(f"[{self.name}] Today's young cards count: {len(ids)}")
         return ids
 
     def _get_todays_cards_ids(self) -> Sequence:

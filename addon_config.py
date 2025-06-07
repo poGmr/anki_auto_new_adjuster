@@ -4,6 +4,11 @@ from typing import Dict, Any
 import os
 import json
 from collections import Counter
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'vendor'))
+
+from pydantic import BaseModel, ConfigDict
 
 
 class AddonConfig:
@@ -12,6 +17,7 @@ class AddonConfig:
         self.logger.debug("__init__")
         self.raw: Dict[str, Any] = self._load()
         self._init_decks_update()
+        self.logger.error(os.path.join(os.path.dirname(__file__), 'vendor'))
 
     def __exit__(self):
         self.logger.debug("__exit__")
