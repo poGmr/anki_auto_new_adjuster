@@ -1,13 +1,12 @@
+import sys
 from aqt import mw
 import logging
 from typing import Dict, Any
 import os
 import json
 from collections import Counter
-import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'vendor'))
-
 from pydantic import BaseModel, ConfigDict
 
 
