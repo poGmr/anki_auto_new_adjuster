@@ -42,8 +42,11 @@ class GUI:
 
     def spin_update_value(self, value, spin):
         did = spin.property("did")
-        # self.logger.info(f"update_value did, value {did}, {value}")
         self.add_on_config.set_deck_state(did=did, key="young_max_difficulty_sum", value=value)
+
+    def todays_spin_update_value(self, value, spin):
+        did = spin.property("did")
+        self.add_on_config.set_deck_state(did=did, key="todays_young_max_difficulty_sum", value=value)
 
     def get_global_settings_group_box(self):
         global_group_box = QGroupBox("GLOBAL")
@@ -87,12 +90,13 @@ class GUI:
         decks_grid_layout.setContentsMargins(5, 5, 5, 5)
         decks_grid_layout.addWidget(QLabel("DECK"), 0, 0, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(QLabel("ENABLED"), 0, 1, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("CURRENT\nDIFFICULTY"), 0, 2,
+        decks_grid_layout.addWidget(QLabel("TODAYS\nYOUNG"), 0, 2, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("TODAYS\nYOUNG MAX"), 0, 3, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("CURRENT\nDIFFICULTY"), 0, 4,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("MAX\nDIFFICULTY"), 0, 3, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("NEW\nDONE"), 0, 4, alignment=Qt.AlignmentFlag.AlignCenter)
-        # decks_grid_layout.addWidget(QLabel("USER\nFOCUS"), 0, 5, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel("STATUS"), 0, 6, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("MAX\nDIFFICULTY"), 0, 5, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("NEW\nDONE"), 0, 6, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel("STATUS"), 0, 7, alignment=Qt.AlignmentFlag.AlignCenter)
 
         i = 1
         total_set = 0
@@ -113,24 +117,27 @@ class GUI:
                 i += 1
                 continue
             ####################################################################################################
+            todays_young_current_difficulty_sum = QLabel(
+                str(self.add_on_config.get_deck_state(did=did, key="todays_young_current_difficulty_sum")))
+            decks_grid_layout.addWidget(todays_young_current_difficulty_sum, i, 2,
+                                        alignment=Qt.AlignmentFlag.AlignCenter)
+            ####################################################################################################
+            todays_young_max_difficulty_sum = str(
+                self.add_on_config.get_deck_state(did=did, key="todays_young_max_difficulty_sum"))
+            todays_young_max_difficulty_sum_spin = QSpinBox()
+            todays_young_max_difficulty_sum_spin.setRange(0, 1000)
+            todays_young_max_difficulty_sum_spin.setValue(int(todays_young_max_difficulty_sum))
+            todays_young_max_difficulty_sum_spin.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            todays_young_max_difficulty_sum_spin.setProperty("did", did)
+            todays_young_max_difficulty_sum_spin.valueChanged.connect(
+                lambda value, spin=todays_young_max_difficulty_sum_spin: self.todays_spin_update_value(value, spin))
+            decks_grid_layout.addWidget(todays_young_max_difficulty_sum_spin, i, 3,
+                                        alignment=Qt.AlignmentFlag.AlignCenter)
+            ####################################################################################################
             young_current_difficulty_sum = QLabel(
                 str(self.add_on_config.get_deck_state(did=did, key="young_current_difficulty_sum")))
             total_young += int(young_current_difficulty_sum.text())
-            decks_grid_layout.addWidget(young_current_difficulty_sum, i, 2, alignment=Qt.AlignmentFlag.AlignCenter)
-            ####################################################################################################
-            new_done = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_done")))
-            decks_grid_layout.addWidget(new_done, i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
-            ####################################################################################################
-            # todays_user_focus_level = self.add_on_config.get_deck_state(did=did, key="todays_user_focus_level")
-            # todays_user_focus_level = (round(todays_user_focus_level * 100))
-            # todays_user_focus_level = QLabel(str(todays_user_focus_level) + "%")
-            # decks_grid_layout.addWidget(todays_user_focus_level, i, 5, alignment=Qt.AlignmentFlag.AlignCenter)
-            ####################################################################################################
-            status_text = str(self.add_on_config.get_deck_state(did=did, key="status"))
-            status_label = QLabel(status_text)
-            decks_grid_layout.addWidget(status_label, i, 6, alignment=Qt.AlignmentFlag.AlignCenter)
-            ####################################################################################################
-            # trend = str(self.add_on_config.get_deck_state(did=did, key="trend"))
+            decks_grid_layout.addWidget(young_current_difficulty_sum, i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             young_max_difficulty_sum = str(self.add_on_config.get_deck_state(did=did, key="young_max_difficulty_sum"))
             total_set += int(young_max_difficulty_sum)
@@ -141,13 +148,20 @@ class GUI:
             young_max_difficulty_sum_spin.setProperty("did", did)
             young_max_difficulty_sum_spin.valueChanged.connect(
                 lambda value, spin=young_max_difficulty_sum_spin: self.spin_update_value(value, spin))
-            decks_grid_layout.addWidget(young_max_difficulty_sum_spin, i, 3, alignment=Qt.AlignmentFlag.AlignCenter)
+            decks_grid_layout.addWidget(young_max_difficulty_sum_spin, i, 5, alignment=Qt.AlignmentFlag.AlignCenter)
+            ####################################################################################################
+            new_done = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_done")))
+            decks_grid_layout.addWidget(new_done, i, 6, alignment=Qt.AlignmentFlag.AlignCenter)
+            ####################################################################################################
+            status_text = str(self.add_on_config.get_deck_state(did=did, key="status"))
+            status_label = QLabel(status_text)
+            decks_grid_layout.addWidget(status_label, i, 7, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             i += 1
-        ### ADD SUMMARY LINE
+        # ADD SUMMARY LINE
         decks_grid_layout.addWidget(QLabel("TOTAL"), i, 0, alignment=Qt.AlignmentFlag.AlignLeft)
-        decks_grid_layout.addWidget(QLabel(str(total_young)), i, 2, alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel(str(total_set)), i, 3, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel(str(total_young)), i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel(str(total_set)), i, 5, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_group_box = QGroupBox("DECKS")
         decks_group_box.setLayout(decks_grid_layout)
         return decks_group_box

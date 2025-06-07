@@ -31,6 +31,7 @@ class Deck:
 
     def update_status(self) -> None:
         self._update_young_current_difficulty_sum()
+        self._update_todays_young_current_difficulty_sum()
         if self.deck_config.id in self.add_on_config.get_duplicated_config_ids():
             self._set_error_status()
             return
@@ -42,13 +43,22 @@ class Deck:
         if self._check_if_any_new_exist() is False:
             self._set_no_new_status()
             return
-
-        young_current_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
-                                                                         key="young_current_difficulty_sum")
-        young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
-        if young_current_difficulty_sum >= young_max_difficulty_sum:
+        #####
+        # young_current_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
+        #                                                                  key="young_current_difficulty_sum")
+        # young_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_difficulty_sum")
+        # if young_current_difficulty_sum >= young_max_difficulty_sum:
+        #     self._set_done_status()
+        #     return
+        #####
+        todays_young_current_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
+                                                                                key="todays_young_current_difficulty_sum")
+        todays_max_difficulty_sum = self.add_on_config.get_deck_state(did=self.id,
+                                                                      key="todays_young_max_difficulty_sum")
+        if todays_young_current_difficulty_sum >= todays_max_difficulty_sum:
             self._set_done_status()
             return
+        #####
         new_after_review_all_decks = self.add_on_config.get_global_state(key="new_after_review_all_decks")
         if new_after_review_all_decks and get_global_count_still_in_queue() > 0:
             self._set_wait_status()
@@ -90,6 +100,16 @@ class Deck:
         ids = mw.col.find_cards(query)
         return ids
 
+    def _get_today_young_cards_ids(self) -> Sequence:
+        query = f'"deck:{self.name}" AND '
+        query += '(rated:1 OR prop:due=0) AND '
+        query += '("is:review" OR "is:learn") AND '
+        query += '"prop:ivl<21" AND '
+        query += '-("is:buried" OR "is:suspended")'
+        ids = mw.col.find_cards(query)
+        self.logger.info(f"[{self.name}] Today's young cards count: {len(ids)}")
+        return ids
+
     def _get_todays_cards_ids(self) -> Sequence:
         query = f'"deck:{self.name}" AND prop:due=0'
         ids = mw.col.find_cards(query)
@@ -106,6 +126,13 @@ class Deck:
         self.add_on_config.set_deck_state(did=self.id, key="young_current_difficulty_sum",
                                           value=young_current_difficulty_sum)
         self.logger.debug(f"[{self.name}] Young current difficulty sum: {young_current_difficulty_sum}")
+
+    def _update_todays_young_current_difficulty_sum(self) -> None:
+        cards_id = self._get_today_young_cards_ids()
+        todays_young_current_difficulty_sum = len(cards_id)
+        self.add_on_config.set_deck_state(did=self.id, key="todays_young_current_difficulty_sum",
+                                          value=todays_young_current_difficulty_sum)
+        self.logger.debug(f"[{self.name}] Today's young current difficulty sum: {todays_young_current_difficulty_sum}")
 
     def _get_count_still_in_queue(self) -> int:
         query = f"deck:{self.name} AND is:due"
