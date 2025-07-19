@@ -100,7 +100,9 @@ class GUI:
 
         i = 1
         total_set = 0
-        total_young = 0
+        all_young_count = 0
+        today_young_sum = 0
+        today_young_max_sum = 0
         for did in self.add_on_config.get_decks_ids():
             ####################################################################################################
             deck_name = QLabel(self.add_on_config.get_deck_state(did=did, key="name"))
@@ -117,13 +119,15 @@ class GUI:
                 i += 1
                 continue
             ####################################################################################################
-            todays_young_current_difficulty_sum = QLabel(
-                str(self.add_on_config.get_deck_state(did=did, key="todays_young_current_difficulty_sum")))
+            today_young = int(self.add_on_config.get_deck_state(did=did, key="todays_young_current_difficulty_sum"))
+            today_young_sum += today_young
+            todays_young_current_difficulty_sum = QLabel(str(today_young))
             decks_grid_layout.addWidget(todays_young_current_difficulty_sum, i, 2,
                                         alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             todays_young_max_difficulty_sum = str(
                 self.add_on_config.get_deck_state(did=did, key="todays_young_max_difficulty_sum"))
+            today_young_max_sum += int(todays_young_max_difficulty_sum)
             todays_young_max_difficulty_sum_spin = QSpinBox()
             todays_young_max_difficulty_sum_spin.setRange(0, 1000)
             todays_young_max_difficulty_sum_spin.setValue(int(todays_young_max_difficulty_sum))
@@ -136,7 +140,7 @@ class GUI:
             ####################################################################################################
             young_current_difficulty_sum = QLabel(
                 str(self.add_on_config.get_deck_state(did=did, key="young_current_difficulty_sum")))
-            total_young += int(young_current_difficulty_sum.text())
+            all_young_count += int(young_current_difficulty_sum.text())
             decks_grid_layout.addWidget(young_current_difficulty_sum, i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             young_max_difficulty_sum = str(self.add_on_config.get_deck_state(did=did, key="young_max_difficulty_sum"))
@@ -160,7 +164,9 @@ class GUI:
             i += 1
         # ADD SUMMARY LINE
         decks_grid_layout.addWidget(QLabel("TOTAL"), i, 0, alignment=Qt.AlignmentFlag.AlignLeft)
-        decks_grid_layout.addWidget(QLabel(str(total_young)), i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel(str(today_young_sum)), i, 2, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel(str(today_young_max_sum)), i, 3, alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel(str(all_young_count)), i, 4, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(QLabel(str(total_set)), i, 5, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_group_box = QGroupBox("DECKS")
         decks_group_box.setLayout(decks_grid_layout)

@@ -80,6 +80,8 @@ class AddonConfig:
             self.raw["decks"][d_id].setdefault("config_id", deck_info['conf'])
             self.raw["decks"][d_id].setdefault("status", "-")
             self.raw["decks"][d_id].setdefault("trend", "")
+            self.raw["decks"][d_id].setdefault("todays_young_current_difficulty_sum", 0)
+            self.raw["decks"][d_id].setdefault("todays_young_max_difficulty_sum", 0)
 
     def _update_decks_in_add_on_config(self):
         self.logger.debug("_update_decks_in_add_on_config")

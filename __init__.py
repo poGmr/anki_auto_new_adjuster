@@ -1,7 +1,6 @@
 from aqt.gui_hooks import profile_did_open, profile_will_close
 from aqt.gui_hooks import reviewer_did_answer_card, reviewer_will_end
 from aqt.gui_hooks import sync_did_finish
-from aqt.gui_hooks import deck_browser_will_render_content
 from aqt.reviewer import Reviewer
 from anki.cards import Card
 from .addon_config import AddonConfig
@@ -111,39 +110,6 @@ def sync_did_finish():
     logger.debug("#")
     update_all_decks()
 
-
-# @deck_browser_will_render_content.append
-# def deck_browser_will_render_content(deck_browser: DeckBrowser, content: DeckBrowserContent):
-#     global logger
-#     global add_on_config
-#     logger.debug("#")
-#     logger.debug(
-#         "################################### deck_browser_will_render_content ###################################")
-#     logger.debug("#")
-#     due_header = "\n<th class=count>Due</th>"
-#     opts_header = "\n<th class=optscol>"
-#     content.tree = content.tree.replace(due_header + opts_header,
-#                                         due_header + "\n<th class=count>Today's<br>difficulty</th>" + opts_header)
-#
-#     deck_id_pattern = re.compile(r'\d{13}')
-#     deck_id_results = deck_id_pattern.findall(content.tree)
-#     for did in set(deck_id_results):
-#         opts_td = "<td align=center class=opts>"
-#         pycmd_onclick = f"<a onclick=\'return pycmd(\"opts:{did}\")"
-#         if add_on_config.get_deck_state(did=did, key="enabled"):
-#             deck = Deck(did=did, logger=logger, add_on_config=add_on_config)
-#             deck.update_status()
-#             todays_difficulty_avg = add_on_config.get_deck_state(did=did, key="todays_difficulty_avg")
-#             diff_td = f"<td align=end>{round(100 * todays_difficulty_avg)}%"
-#             content.tree = content.tree.replace(opts_td + pycmd_onclick,
-#                                                 diff_td + opts_td + pycmd_onclick)
-#         else:
-#             diff_td = f"<td align=end>-"
-#             content.tree = content.tree.replace(opts_td + pycmd_onclick,
-#                                                 diff_td + opts_td + pycmd_onclick)
-
-
-############################################################################################
 
 logger = initialize_logger()
 add_on_config: AddonConfig
