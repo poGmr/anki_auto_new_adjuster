@@ -1,13 +1,9 @@
-import sys
 from aqt import mw
 import logging
 from typing import Dict, Any
 import os
 import json
 from collections import Counter
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'vendor'))
-from pydantic import BaseModel, ConfigDict
 
 
 class AddonConfig:
@@ -28,7 +24,7 @@ class AddonConfig:
         config_path = os.path.join(profile_folder, "auto_new_adjuster_config.json")
         if os.path.exists(config_path):
             try:
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     config = json.load(f)
             except json.JSONDecodeError as e:
                 self.logger.error(f"Failed to decode JSON from {config_path}: {e}")
@@ -55,8 +51,8 @@ class AddonConfig:
         self.raw.setdefault("global", {})
         self.raw["global"].setdefault("low_focus_level", 0.85)
         self.raw["global"].setdefault("high_focus_level", 0.95)
-        self.raw["global"].setdefault("lowest_young_max_difficulty_sum", 1)
-        self.raw["global"].setdefault("highest_young_max_difficulty_sum", 240)
+        self.raw["global"].setdefault("lowest_young_max_young_sum", 1)
+        self.raw["global"].setdefault("highest_young_max_young_sum", 240)
         self.raw["global"].setdefault("new_after_review_all_decks", True)
         self.raw.setdefault("decks", {})
 
@@ -72,16 +68,16 @@ class AddonConfig:
             self.raw["decks"].setdefault(d_id, {})
             self.raw["decks"][d_id].setdefault("name", deck.name)
             self.raw["decks"][d_id].setdefault("enabled", False)
-            self.raw["decks"][d_id].setdefault("young_max_difficulty_sum", 1)
+            self.raw["decks"][d_id].setdefault("young_max_young_sum", 1)
             self.raw["decks"][d_id].setdefault("last_updated", 0)
-            self.raw["decks"][d_id].setdefault("young_current_difficulty_sum", 0)
+            self.raw["decks"][d_id].setdefault("young_current_young_sum", 0)
             self.raw["decks"][d_id].setdefault("new_done", 0)
             self.raw["decks"][d_id].setdefault("todays_user_focus_level", 1.0)
             self.raw["decks"][d_id].setdefault("config_id", deck_info['conf'])
             self.raw["decks"][d_id].setdefault("status", "-")
             self.raw["decks"][d_id].setdefault("trend", "")
-            self.raw["decks"][d_id].setdefault("todays_young_current_difficulty_sum", 0)
-            self.raw["decks"][d_id].setdefault("todays_young_max_difficulty_sum", 0)
+            self.raw["decks"][d_id].setdefault("todays_young_current_young_sum", 0)
+            self.raw["decks"][d_id].setdefault("todays_young_max_young_sum", 0)
 
     def _update_decks_in_add_on_config(self):
         self.logger.debug("_update_decks_in_add_on_config")
