@@ -95,16 +95,16 @@ class Deck:
     def _get_young_cards_ids(self) -> Sequence:
         query = f'"deck:{self.name}" AND '
         query += '("is:review" OR "is:learn") AND '
-        query += '"prop:ivl<21" AND '
+        query += '("prop:ivl<21" OR "introduced:1") AND '
         query += '-("is:buried" OR "is:suspended")'
         ids = mw.col.find_cards(query)
         return ids
 
     def _get_today_young_cards_ids(self) -> Sequence:
         query = f'"deck:{self.name}" AND '
-        query += '(rated:1 OR prop:due=0) AND '
+        query += '(rated:1 OR prop:due<=0) AND '
         query += '("is:review" OR "is:learn") AND '
-        query += '"prop:ivl<21" AND '
+        query += '("prop:ivl<21" OR "introduced:1") AND '
         query += '-("is:buried" OR "is:suspended")'
         ids = mw.col.find_cards(query)
         self.logger.debug(f"[{self.name}] Today's young cards count: {len(ids)}")
