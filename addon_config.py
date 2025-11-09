@@ -48,10 +48,6 @@ class AddonConfig:
     def _add_new_decks_to_add_on_config(self):
         self.logger.debug("_add_new_decks_to_add_on_config")
         self.raw.setdefault("global", {})
-        self.raw["global"].setdefault("low_focus_level", 0.85)
-        self.raw["global"].setdefault("high_focus_level", 0.95)
-        self.raw["global"].setdefault("lowest_young_max_young_sum", 1)
-        self.raw["global"].setdefault("highest_young_max_young_sum", 240)
         self.raw["global"].setdefault("new_after_review_all_decks", True)
         self.raw.setdefault("decks", {})
 
@@ -67,16 +63,12 @@ class AddonConfig:
             self.raw["decks"].setdefault(d_id, {})
             self.raw["decks"][d_id].setdefault("name", deck.name)
             self.raw["decks"][d_id].setdefault("enabled", False)
-            self.raw["decks"][d_id].setdefault("young_max_young_sum", 1)
-            self.raw["decks"][d_id].setdefault("last_updated", 0)
-            self.raw["decks"][d_id].setdefault("young_current_young_sum", 0)
+            self.raw["decks"][d_id].setdefault("nlry_sum", 0)
             self.raw["decks"][d_id].setdefault("new_done", 0)
-            self.raw["decks"][d_id].setdefault("todays_user_focus_level", 1.0)
             self.raw["decks"][d_id].setdefault("config_id", deck_info['conf'])
             self.raw["decks"][d_id].setdefault("status", "-")
-            self.raw["decks"][d_id].setdefault("trend", "")
-            self.raw["decks"][d_id].setdefault("todays_young_current_young_sum", 0)
-            self.raw["decks"][d_id].setdefault("todays_young_max_young_sum", 0)
+            self.raw["decks"][d_id].setdefault("todays_nlry_sum", 0)
+            self.raw["decks"][d_id].setdefault("todays_nlry_max", 0)
 
     def _update_decks_in_add_on_config(self):
         self.logger.debug("_update_decks_in_add_on_config")

@@ -3,10 +3,6 @@ from collections.abc import Sequence
 import logging
 from .config import DeckConfig
 from .addon_config import AddonConfig
-from typing import Optional
-import datetime
-import math
-from anki.cards import Card
 
 
 def get_global_count_still_in_queue() -> int:
@@ -25,8 +21,8 @@ class Deck:
         self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id, add_on_config=add_on_config)
 
     def update_status(self) -> None:
-        self._update_young_current_young_sum()
-        self._update_todays_young_current_young_sum()
+        self._update_nlry_sum()
+        self._update_todays_nlry_sum()
         if self.deck_config.id in self.add_on_config.get_duplicated_config_ids():
             self._set_error_status()
             return
@@ -38,11 +34,11 @@ class Deck:
         if not self._check_if_any_new_exist():
             self._set_no_new_status()
             return
-        todays_young_current_young_sum = self.add_on_config.get_deck_state(did=self.id,
-                                                                           key="todays_young_current_young_sum")
-        todays_max_young_sum = self.add_on_config.get_deck_state(did=self.id,
-                                                                 key="todays_young_max_young_sum")
-        if todays_young_current_young_sum >= todays_max_young_sum:
+        todays_nlry_sum = self.add_on_config.get_deck_state(did=self.id,
+                                                            key="todays_nlry_sum")
+        todays_max_nlry_sum = self.add_on_config.get_deck_state(did=self.id,
+                                                                key="todays_nlry_max")
+        if todays_nlry_sum >= todays_max_nlry_sum:
             self._set_done_status()
             return
         new_after_review_all_decks = self.add_on_config.get_global_state(key="new_after_review_all_decks")
@@ -78,7 +74,7 @@ class Deck:
         self.add_on_config.set_deck_state(did=self.id, key="status", value="NEW")
         self.deck_config.set_new_count(new_count=999)
 
-    def _get_young_cards_ids(self) -> Sequence:
+    def _get_nlry_cards_ids(self) -> Sequence:
         query = f'"deck:{self.name}" AND '
         query += '("is:review" OR "is:learn") AND '
         query += '("prop:ivl<21" OR "introduced:1") AND '
@@ -86,14 +82,14 @@ class Deck:
         ids = mw.col.find_cards(query)
         return ids
 
-    def _get_today_young_cards_ids(self) -> Sequence:
+    def _get_today_nlry_cards_ids(self) -> Sequence:
         query = f'"deck:{self.name}" AND '
         query += '(rated:1 OR prop:due<=0) AND '
         query += '("is:review" OR "is:learn") AND '
         query += '("prop:ivl<21" OR "introduced:1") AND '
         query += '-("is:buried" OR "is:suspended")'
         ids = mw.col.find_cards(query)
-        self.logger.debug(f"[{self.name}] Today's young cards count: {len(ids)}")
+        self.logger.debug(f"[{self.name}] Today's nlry cards count: {len(ids)}")
         return ids
 
     def _update_new_done_cards(self) -> None:
@@ -101,19 +97,19 @@ class Deck:
         count = len(mw.col.find_cards(query))
         self.add_on_config.set_deck_state(did=self.id, key="new_done", value=count)
 
-    def _update_young_current_young_sum(self) -> None:
-        cards_id = self._get_young_cards_ids()
-        young_current_young_sum = len(cards_id)
-        self.add_on_config.set_deck_state(did=self.id, key="young_current_young_sum",
-                                          value=young_current_young_sum)
-        self.logger.debug(f"[{self.name}] Young current difficulty sum: {young_current_young_sum}")
+    def _update_nlry_sum(self) -> None:
+        cards_id = self._get_nlry_cards_ids()
+        nlry_sum = len(cards_id)
+        self.add_on_config.set_deck_state(did=self.id, key="nlry_sum",
+                                          value=nlry_sum)
+        self.logger.debug(f"[{self.name}] nlry sum: {nlry_sum}")
 
-    def _update_todays_young_current_young_sum(self) -> None:
-        cards_id = self._get_today_young_cards_ids()
-        todays_young_current_young_sum = len(cards_id)
-        self.add_on_config.set_deck_state(did=self.id, key="todays_young_current_young_sum",
-                                          value=todays_young_current_young_sum)
-        self.logger.debug(f"[{self.name}] Today's young current difficulty sum: {todays_young_current_young_sum}")
+    def _update_todays_nlry_sum(self) -> None:
+        cards_id = self._get_today_nlry_cards_ids()
+        todays_nlry_sum = len(cards_id)
+        self.add_on_config.set_deck_state(did=self.id, key="todays_nlry_sum",
+                                          value=todays_nlry_sum)
+        self.logger.debug(f"[{self.name}] Today's nlry sum: {todays_nlry_sum}")
 
     def _get_count_still_in_queue(self) -> int:
         query = f"deck:{self.name} AND is:due"
