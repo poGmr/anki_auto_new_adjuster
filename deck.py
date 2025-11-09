@@ -3,6 +3,9 @@ from collections.abc import Sequence
 import logging
 from .config import DeckConfig
 from .addon_config import AddonConfig
+from typing import Optional
+import datetime
+import math
 
 
 def get_global_count_still_in_queue() -> int:
@@ -89,7 +92,10 @@ class Deck:
         query += '("prop:ivl<21" OR "introduced:1") AND '
         query += '-("is:buried" OR "is:suspended")'
         ids = mw.col.find_cards(query)
-        self.logger.debug(f"[{self.name}] Today's young cards count: {len(ids)}")
+        self.logger.info(f"[{self.name}] Today's young cards count: {len(ids)}")
+        for id in ids:
+            self.logger.info(
+                f"[{self.name}] Today's young card ID: {id}, Retrievability: {self._get_card_retrievability(id)}")
         return ids
 
     def _update_new_done_cards(self) -> None:
@@ -123,3 +129,58 @@ class Deck:
             return True
         else:
             return False
+
+    def _get_card_retrievability(self, card_id: int) -> Optional[float]:
+        """
+        Calculate current retrievability (probability of recall) for a given card
+        based on FSRS model parameters.
+
+        FSRS retrievability formula:
+            R = exp(-t / S)
+
+        where:
+            t = time since last review (in days)
+            S = card stability (in days)
+
+        Parameters
+        ----------
+        card_id : int
+            The unique card ID (from col.cards.id).
+
+        Returns
+        -------
+        Optional[float]
+            Retrievability between 0.0 and 1.0, or None if data is unavailable.
+        """
+        try:
+            # Step 1: Query FSRS metadata from Anki DB (available in v24+ FSRS system)
+            # Custom data stored in the 'cards' table (json in 'data' field)
+            card = mw.col.get_card(card_id)
+            data = getattr(card, "fsrs", None)
+            self.logger.info(F"[FSRS Addon] Card ID: {card_id}, FSRS data: {data}")
+
+            # If FSRS metadata not yet available
+            if not data or "stability" not in data:
+                return None
+
+            stability = float(data["stability"])
+            last_review_ts = data.get("last_review", card.mod)  # fallback to modified time
+
+            # Step 2: Compute days since last review
+            last_review_date = datetime.datetime.fromtimestamp(last_review_ts)
+            today = datetime.datetime.now()
+            elapsed_days = (today - last_review_date).days
+
+            # Safety guard
+            if stability <= 0:
+                return None
+
+            # Step 3: Compute retrievability using FSRS decay model
+            retrievability = math.exp(-elapsed_days / stability)
+
+            # Clip to [0, 1] range just in case of rounding
+            return max(0.0, min(1.0, retrievability))
+
+        except Exception as e:
+            print(f"[FSRS Addon] Failed to compute retrievability for card {card_id}: {e}")
+            return None
