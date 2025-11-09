@@ -5,15 +5,6 @@ from .config import DeckConfig
 from .addon_config import AddonConfig
 
 
-def get_card_difficulty(card_id: int) -> float:
-    query = f"SELECT json_extract(data, '$.d') FROM cards WHERE id={card_id}"
-    init_diff: float | None = mw.col.db.all(query)[0][0]
-    if init_diff is None:
-        return 0.5
-    else:
-        return (init_diff - 1) / 9
-
-
 def get_global_count_still_in_queue() -> int:
     query = "is:due"
     cards_count = len(mw.col.find_cards(query))
@@ -43,14 +34,6 @@ class Deck:
         if not self._check_if_any_new_exist():
             self._set_no_new_status()
             return
-        #####
-        # young_current_young_sum = self.add_on_config.get_deck_state(did=self.id,
-        #                                                                  key="young_current_young_sum")
-        # young_max_young_sum = self.add_on_config.get_deck_state(did=self.id, key="young_max_young_sum")
-        # if young_current_young_sum >= young_max_young_sum:
-        #     self._set_done_status()
-        #     return
-        #####
         todays_young_current_young_sum = self.add_on_config.get_deck_state(did=self.id,
                                                                            key="todays_young_current_young_sum")
         todays_max_young_sum = self.add_on_config.get_deck_state(did=self.id,
@@ -58,7 +41,6 @@ class Deck:
         if todays_young_current_young_sum >= todays_max_young_sum:
             self._set_done_status()
             return
-        #####
         new_after_review_all_decks = self.add_on_config.get_global_state(key="new_after_review_all_decks")
         if new_after_review_all_decks and get_global_count_still_in_queue() > 0:
             self._set_wait_status()
@@ -110,11 +92,6 @@ class Deck:
         self.logger.debug(f"[{self.name}] Today's young cards count: {len(ids)}")
         return ids
 
-    def _get_todays_cards_ids(self) -> Sequence:
-        query = f'"deck:{self.name}" AND prop:due=0'
-        ids = mw.col.find_cards(query)
-        return ids
-
     def _update_new_done_cards(self) -> None:
         query = f'"deck:{self.name}" AND introduced:1'
         count = len(mw.col.find_cards(query))
@@ -136,11 +113,6 @@ class Deck:
 
     def _get_count_still_in_queue(self) -> int:
         query = f"deck:{self.name} AND is:due"
-        cards_count = len(mw.col.find_cards(query))
-        return cards_count
-
-    def _get_today_rated(self) -> int:
-        query = f"deck:{self.name} AND rated:1"
         cards_count = len(mw.col.find_cards(query))
         return cards_count
 

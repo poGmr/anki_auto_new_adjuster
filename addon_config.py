@@ -12,7 +12,6 @@ class AddonConfig:
         self.logger.debug("__init__")
         self.raw: Dict[str, Any] = self._load()
         self._init_decks_update()
-        self.logger.error(os.path.join(os.path.dirname(__file__), 'vendor'))
 
     def __exit__(self):
         self.logger.debug("__exit__")
@@ -128,6 +127,7 @@ class AddonConfig:
             self.logger.error(f"set_global_state error")
 
     def get_deck_state(self, did: str, key: str):
+        print("a")
         if did in self.raw["decks"] and key in self.raw["decks"][did]:
             value = self.raw["decks"][did][key]
             self.logger.debug(f"get_deck_state did {did} key {key} value {value}")
