@@ -99,6 +99,7 @@ class GUI:
         all_nlry_count = 0
         today_nlry_sum = 0
         today_nlry_max_sum = 0
+        all_new_done = 0
         for did in self.add_on_config.get_decks_ids():
             ####################################################################################################
             deck_name = QLabel(self.add_on_config.get_deck_state(did=did, key="name"))
@@ -139,8 +140,10 @@ class GUI:
             all_nlry_count += int(nlry_sum.text())
             decks_grid_layout.addWidget(nlry_sum, row, DC.ALL_NLRY, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
-            new_done = QLabel(str(self.add_on_config.get_deck_state(did=did, key="new_done")))
-            decks_grid_layout.addWidget(new_done, row, DC.NEW_DONE, alignment=Qt.AlignmentFlag.AlignCenter)
+            new_done_count = self.add_on_config.get_deck_state(did=did, key="new_done")
+            all_new_done += int(new_done_count)
+            new_done_label = QLabel(str(new_done_count))
+            decks_grid_layout.addWidget(new_done_label, row, DC.NEW_DONE, alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             status_text = str(self.add_on_config.get_deck_state(did=did, key="status"))
             status_label = QLabel(status_text)
@@ -155,6 +158,8 @@ class GUI:
         decks_grid_layout.addWidget(QLabel(str(today_nlry_max_sum)), row, DC.TODAYS_NLRY_MAX,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(QLabel(str(all_nlry_count)), row, DC.ALL_NLRY,
+                                    alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(QLabel(str(all_new_done)), row, DC.NEW_DONE,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
         ####################################################################################################
         decks_group_box = QGroupBox("DECKS")
