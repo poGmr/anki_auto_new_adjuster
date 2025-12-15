@@ -49,7 +49,7 @@ def profile_did_open():
     global gui_menu
     logger.debug("#")
     logger.debug("################################### profile_did_open ###################################")
-    logger.info("#")
+    logger.info("###")
     add_on_config = AddonConfig(logger=logger)
     gui_menu = GUI(logger, add_on_config)
     menu_button = QAction("Auto New Adjuster", mw)
@@ -107,7 +107,7 @@ def sync_did_finish():
     global logger
     logger.debug("#")
     logger.debug("################################### sync_did_finish ###################################")
-    logger.debug("#")
+    logger.info("#")
     update_all_decks()
 
 

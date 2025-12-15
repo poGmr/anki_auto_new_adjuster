@@ -21,6 +21,8 @@ class Deck:
         self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id, add_on_config=add_on_config)
 
     def update_status(self) -> None:
+        self.get_last_100_nlry_reviews_retention_rate()
+        #
         self._update_nlry_sum()
         self._update_todays_nlry_sum()
         if self.deck_config.id in self.add_on_config.get_duplicated_config_ids():
@@ -54,20 +56,20 @@ class Deck:
     def _set_review_status(self) -> None:
         self.add_on_config.set_deck_state(did=self.id, key="status", value="REVIEW")
         self.add_on_config.set_deck_state(did=self.id, key="new_done", value=0)
-        self.deck_config.set_new_count(new_count=0)
+        self.deck_config.set_new_count(new_count=1)
         self.logger.debug(f"[{self.name}] Cards still in review queue - no action to take.")
 
     def _set_done_status(self) -> None:
         self.add_on_config.set_deck_state(did=self.id, key="status", value="DONE")
-        self.deck_config.set_new_count(new_count=0)
+        self.deck_config.set_new_count(new_count=1)
 
     def _set_no_new_status(self) -> None:
         self.add_on_config.set_deck_state(did=self.id, key="status", value="NO NEW")
-        self.deck_config.set_new_count(new_count=0)
+        self.deck_config.set_new_count(new_count=1)
 
     def _set_wait_status(self) -> None:
         self.add_on_config.set_deck_state(did=self.id, key="status", value="WAIT")
-        self.deck_config.set_new_count(new_count=0)
+        self.deck_config.set_new_count(new_count=1)
         self.logger.debug(f"[{self.name}] Due cards still in review queue in other decks - no action to take.")
 
     def _set_new_status(self) -> None:
@@ -123,3 +125,26 @@ class Deck:
             return True
         else:
             return False
+
+    def get_last_100_nlry_reviews_retention_rate(self) -> float:
+        query = """
+                SELECT revlog.ease
+                FROM revlog
+                         JOIN cards ON revlog.cid = cards.id
+                WHERE cards.did = ?
+                  AND revlog.lastIvl < 21
+                  AND revlog.type IN (0, 1, 2)
+                ORDER BY revlog.id DESC LIMIT 100
+                """
+
+        rows = mw.col.db.all(query, self.id)
+
+        if len(rows) < 100:
+            self.logger.info(
+                f"[{self.name}] Not enough reviews to calculate retention rate (only {len(rows)} reviews).")
+            return 0.0
+        correct = sum(1 for (ease,) in rows if ease > 1)
+        retention = correct / len(rows)
+        self.logger.info(
+            f"[{self.name}] Retention rate for last 100 reviews: {retention:.0%}")
+        return retention
