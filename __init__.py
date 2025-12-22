@@ -14,19 +14,21 @@ from logging.handlers import RotatingFileHandler
 from aqt import mw
 
 
-def update_all_decks() -> None:
-    global add_on_config
-    if 'add_on_config' in globals() and add_on_config is not None:
-        for did in add_on_config.raw["decks"]:
-            update_deck(did=did)
+class Manager:
+    @classmethod
+    def update_all_decks(cls) -> None:
+        global add_on_config
+        if 'add_on_config' in globals() and add_on_config is not None:
+            for did in add_on_config.raw["decks"]:
+                Manager.update_deck(did=did)
 
-
-def update_deck(did: str) -> None:
-    global logger
-    global add_on_config
-    if add_on_config.get_deck_state(did=did, key="enabled"):
-        deck = Deck(did=did, logger=logger, add_on_config=add_on_config)
-        deck.update_status()
+    @classmethod
+    def update_deck(cls, did: str) -> None:
+        global logger
+        global add_on_config
+        if add_on_config.get_deck_state(did=did, key="enabled"):
+            deck = Deck(did=did, logger=logger, add_on_config=add_on_config)
+            deck.update_status()
 
 
 def initialize_logger():
@@ -53,7 +55,7 @@ def profile_did_open():
     add_on_config = AddonConfig(logger=logger)
     gui_menu = GUI(logger, add_on_config)
     menu_button = QAction("Auto New Adjuster", mw)
-    menu_button.triggered.connect(update_all_decks)
+    menu_button.triggered.connect(Manager.update_all_decks)
     menu_button.triggered.connect(gui_menu.create_settings_window)
     mw.form.menuTools.addAction(menu_button)
 
@@ -66,12 +68,12 @@ def profile_will_close():
     logger.debug("#")
     logger.debug("################################### profile_will_close ###################################")
     logger.debug("#")
-    update_all_decks()
+    Manager.update_all_decks()
     try:
         if menu_button:
             mw.form.menuTools.removeAction(menu_button)
             menu_button.triggered.disconnect(gui_menu.create_settings_window)
-            menu_button.triggered.disconnect(update_all_decks)
+            menu_button.triggered.disconnect(Manager.update_all_decks)
             del menu_button
     except NameError:
         pass  # menu_button was not defined, ignore
@@ -90,7 +92,7 @@ def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2,
         did = str(card.did)
     else:
         did = str(card.odid)
-    update_deck(did=did)
+    Manager.update_deck(did=did)
 
 
 @reviewer_will_end.append
@@ -99,7 +101,7 @@ def reviewer_will_end():
     logger.debug("#")
     logger.debug("################################### reviewer_did_answer_card ###################################")
     logger.debug("#")
-    update_all_decks()
+    Manager.update_all_decks()
 
 
 @sync_did_finish.append
@@ -108,7 +110,7 @@ def sync_did_finish():
     logger.debug("#")
     logger.debug("################################### sync_did_finish ###################################")
     logger.info("#")
-    update_all_decks()
+    Manager.update_all_decks()
 
 
 logger = initialize_logger()

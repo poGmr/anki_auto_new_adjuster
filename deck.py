@@ -133,7 +133,7 @@ class Deck:
                          JOIN cards ON revlog.cid = cards.id
                 WHERE cards.did = ?
                   AND revlog.lastIvl < 21
-                  AND revlog.type IN (0, 1, 2)
+                  AND revlog.type = 1
                 ORDER BY revlog.id DESC LIMIT 100
                 """
 
