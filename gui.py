@@ -12,6 +12,7 @@ class DC:
     ALL_NLRY = 4
     NEW_DONE = 5
     STATUS = 6
+    LAST_100_NLRY_RETENTION = 7
 
 
 def get_checkbox_css_style() -> str:
@@ -94,6 +95,8 @@ class GUI:
                                     alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(get_header_table_ql("STATUS"), 0, DC.STATUS,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
+        decks_grid_layout.addWidget(get_header_table_ql("LAST 100"), 0, DC.LAST_100_NLRY_RETENTION,
+                                    alignment=Qt.AlignmentFlag.AlignCenter)
 
         row = 1
         all_nlry_count = 0
@@ -148,6 +151,13 @@ class GUI:
             status_text = str(self.add_on_config.get_deck_state(did=did, key="status"))
             status_label = QLabel(status_text)
             decks_grid_layout.addWidget(status_label, row, DC.STATUS, alignment=Qt.AlignmentFlag.AlignCenter)
+            ####################################################################################################
+            last_100_nlry_retention_str = str(
+                self.add_on_config.get_deck_state(did=did, key="last_100_nlry_reviews_retention"))
+            last_100_nlry_retention_per = round(float(last_100_nlry_retention_str) * 100)
+            last_100_nlry_retention_qlable = QLabel(str(last_100_nlry_retention_per) + "%")
+            decks_grid_layout.addWidget(last_100_nlry_retention_qlable, row, DC.LAST_100_NLRY_RETENTION,
+                                        alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             row += 1
         # ADD SUMMARY LINE #################################################################################
