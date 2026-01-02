@@ -119,19 +119,18 @@ class AddonConfig:
             self.logger.error(f"set_global_state error")
 
     def get_deck_state(self, did: str, key: str):
-        print("a")
         if did in self.raw["decks"] and key in self.raw["decks"][did]:
             value = self.raw["decks"][did][key]
-            self.logger.debug(f"get_deck_state did {did} key {key} value {value}")
+            self.logger.info(f"get_deck_state did {did} key {key} value {value}")
             return value
         else:
             self.logger.error(f"get_deck_state did {did} key {key}")
             return None
 
-    def set_deck_state(self, did: str, key: str, value):
-        self.logger.debug(f"set_deck_state did {did} key {key} value {value}")
+    def set_deck_state(self, did: str, key: str, value: str | int | float):
+        self.logger.info(f"set_deck_state did {did} key {key} value {value}")
         if did in self.raw["decks"]:
-            self.raw["decks"][did][key] = value
+            self.raw["decks"][did][key] = str(value)
         else:
             self.logger.error(f"set_deck_state error")
 

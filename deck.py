@@ -35,10 +35,10 @@ class Deck:
         if not self._check_if_any_new_exist():
             self._set_no_new_status()
             return
-        todays_nlry_sum = self.add_on_config.get_deck_state(did=self.id,
-                                                            key="todays_nlry_sum")
-        todays_max_nlry_sum = self.add_on_config.get_deck_state(did=self.id,
-                                                                key="todays_nlry_max")
+        todays_nlry_sum = int(self.add_on_config.get_deck_state(did=self.id,
+                                                                key="todays_nlry_sum"))
+        todays_max_nlry_sum = int(self.add_on_config.get_deck_state(did=self.id,
+                                                                    key="todays_nlry_max"))
         if todays_nlry_sum >= todays_max_nlry_sum:
             self._set_done_status()
             return
@@ -125,7 +125,7 @@ class Deck:
         else:
             return False
 
-    def _update_last_100_nlry_reviews_retention_rate(self) -> float:
+    def _update_last_100_nlry_reviews_retention_rate(self) -> float | None:
         query = """
                 SELECT revlog.ease
                 FROM revlog
