@@ -5,8 +5,9 @@ from .addon_config import AddonConfig
 
 
 class DeckConfig:
-    def __init__(self, logger: logging.Logger, did: str, add_on_config: AddonConfig) -> None:
-        self.logger: logging.Logger = logger
+    logger: logging.Logger = logging.getLogger(__name__)
+
+    def __init__(self, did: str, add_on_config: AddonConfig) -> None:
         self.add_on_config: AddonConfig = add_on_config
         self.did = did
         self.raw_data = mw.col.decks.config_dict_for_deck_id(did)

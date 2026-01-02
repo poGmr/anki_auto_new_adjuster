@@ -14,6 +14,20 @@ from logging.handlers import RotatingFileHandler
 from aqt import mw
 
 
+def initialize_logging():
+    log_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "auto_new_adjuster.log")
+    handler = RotatingFileHandler(log_file_path, maxBytes=5 * 1024 * 1024, backupCount=3)
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s][%(name)s]: %(message)s")
+    handler.setFormatter(formatter)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.addHandler(handler)
+
+
+initialize_logging()
+logger = logging.getLogger(__name__)
+
+
 class Manager:
     @classmethod
     def update_all_decks(cls) -> None:
@@ -24,24 +38,10 @@ class Manager:
 
     @classmethod
     def update_deck(cls, did: str) -> None:
-        global logger
         global add_on_config
         if add_on_config.get_deck_state(did=did, key="enabled"):
-            deck = Deck(did=did, logger=logger, add_on_config=add_on_config)
+            deck = Deck(did=did, add_on_config=add_on_config)
             deck.update_status()
-
-
-def initialize_logger():
-    result = logging.getLogger(__name__)
-    if not result.handlers:
-        log_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "auto_new_adjuster.log")
-        file_handler = RotatingFileHandler(log_file_path, maxBytes=5 * 1024 * 1024, backupCount=3)
-        log_format = "%(asctime)s [%(levelname)s]: %(message)s"
-        formatter = logging.Formatter(log_format)
-        file_handler.setFormatter(formatter)
-        result.addHandler(file_handler)
-        result.setLevel(logging.INFO)
-    return result
 
 
 @profile_did_open.append
@@ -52,8 +52,8 @@ def profile_did_open():
     logger.debug("#")
     logger.debug("################################### profile_did_open ###################################")
     logger.info("###")
-    add_on_config = AddonConfig(logger=logger)
-    gui_menu = GUI(logger, add_on_config)
+    add_on_config = AddonConfig()
+    gui_menu = GUI(add_on_config)
     menu_button = QAction("Auto New Adjuster", mw)
     menu_button.triggered.connect(Manager.update_all_decks)
     menu_button.triggered.connect(gui_menu.create_settings_window)
@@ -84,7 +84,6 @@ def profile_will_close():
 
 @reviewer_did_answer_card.append
 def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2, 3, 4]):
-    global logger
     logger.debug("#")
     logger.debug("################################### reviewer_did_answer_card ###################################")
     logger.debug("#")
@@ -97,7 +96,6 @@ def reviewer_did_answer_card(reviewer: Reviewer, card: Card, ease: Literal[1, 2,
 
 @reviewer_will_end.append
 def reviewer_will_end():
-    global logger
     logger.debug("#")
     logger.debug("################################### reviewer_did_answer_card ###################################")
     logger.debug("#")
@@ -106,14 +104,12 @@ def reviewer_will_end():
 
 @sync_did_finish.append
 def sync_did_finish():
-    global logger
     logger.debug("#")
     logger.debug("################################### sync_did_finish ###################################")
     logger.info("#")
     Manager.update_all_decks()
 
 
-logger = initialize_logger()
 add_on_config: AddonConfig
 menu_button: QAction
 gui_menu: GUI

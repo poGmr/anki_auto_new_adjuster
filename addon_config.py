@@ -7,8 +7,9 @@ from collections import Counter
 
 
 class AddonConfig:
-    def __init__(self, logger: logging.Logger):
-        self.logger: logging.Logger = logger
+    logger: logging.Logger = logging.getLogger(__name__)
+
+    def __init__(self):
         self.logger.debug("__init__")
         self.raw: Dict[str, Any] = self._load()
         self._init_decks_update()
@@ -121,16 +122,20 @@ class AddonConfig:
     def get_deck_state(self, did: str, key: str):
         if did in self.raw["decks"] and key in self.raw["decks"][did]:
             value = self.raw["decks"][did][key]
-            self.logger.info(f"get_deck_state did {did} key {key} value {value}")
+            # self.logger.debug(f"get_deck_state did {did} key {key} value {value}")
             return value
         else:
             self.logger.error(f"get_deck_state did {did} key {key}")
             return None
 
     def set_deck_state(self, did: str, key: str, value: str | int | float):
-        self.logger.info(f"set_deck_state did {did} key {key} value {value}")
+        self.logger.debug(f"set_deck_state did {did} key {key} value {value}")
+        valid_json_types = (str, int, float, bool, type(None), list, dict)
+        if not isinstance(value, valid_json_types):
+            self.logger.error(f"set_deck_state error: Invalid value type {type(value)} for key {key}")
+            return
         if did in self.raw["decks"]:
-            self.raw["decks"][did][key] = str(value)
+            self.raw["decks"][did][key] = value
         else:
             self.logger.error(f"set_deck_state error")
 

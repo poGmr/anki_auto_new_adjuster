@@ -12,13 +12,14 @@ def get_global_count_still_in_queue() -> int:
 
 
 class Deck:
-    def __init__(self, did: str, logger: logging.Logger, add_on_config: AddonConfig) -> None:
-        self.logger: logging.Logger = logger
+    logger: logging.Logger = logging.getLogger(__name__)
+
+    def __init__(self, did: str, add_on_config: AddonConfig) -> None:
         self.add_on_config: AddonConfig = add_on_config
         self.raw_data: dict[str, str] = mw.col.decks.get(did)
         self.id: str = str(self.raw_data["id"])
         self.name: str = self.raw_data["name"]
-        self.deck_config: DeckConfig = DeckConfig(logger=self.logger, did=self.id, add_on_config=add_on_config)
+        self.deck_config: DeckConfig = DeckConfig(did=self.id, add_on_config=add_on_config)
 
     def update_status(self) -> None:
         self._update_nlry_sum()
