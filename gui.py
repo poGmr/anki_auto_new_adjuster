@@ -39,7 +39,7 @@ class TableColumnCheckBox:
         widget.setProperty("did", did)
         widget.setStyleSheet(self._get_css_style())
         value = self.add_on_config.get_deck_state(did=did, key="enabled")
-        logger.info(f"Set checkbox for did={did} value {value} type {type(value)}")
+        logger.debug(f"Set checkbox for did={did} value {value} type {type(value)}")
         widget.setChecked(value)
         widget.stateChanged.connect(
             lambda state, checkbox=widget: self.change_state(state, checkbox))
@@ -47,7 +47,7 @@ class TableColumnCheckBox:
         return widget
 
     def change_state(self, state, checkbox: QCheckBox):
-        logger.info(f"Change state to {state} {checkbox.isChecked()}")
+        logger.debug(f"Change state to {state} {checkbox.isChecked()}")
         did = checkbox.property("did")
         self.add_on_config.set_deck_state(did=did, key="enabled", value=checkbox.isChecked())
 
@@ -79,10 +79,7 @@ class TableColumnSpinBox:
 
 
 class GUI:
-    logger: logging.Logger = logging.getLogger(__name__)
-
     def __init__(self, add_on_config: AddonConfig):
-        self.logger: logging.Logger = logging.getLogger(__name__)
         self.add_on_config: AddonConfig = add_on_config
 
     def change_global_checkbox_state(self, state, checkbox):

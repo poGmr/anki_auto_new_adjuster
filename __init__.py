@@ -20,7 +20,7 @@ def initialize_logging():
     formatter = logging.Formatter("%(asctime)s [%(levelname)s][%(name)s]: %(message)s")
     handler.setFormatter(formatter)
     root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
+    root.setLevel(logging.INFO)
     root.addHandler(handler)
 
 
