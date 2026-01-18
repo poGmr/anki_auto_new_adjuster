@@ -64,12 +64,11 @@ class AddonConfig:
             self.raw["decks"].setdefault(d_id, {})
             self.raw["decks"][d_id].setdefault("name", deck.name)
             self.raw["decks"][d_id].setdefault("enabled", False)
-            self.raw["decks"][d_id].setdefault("nlry_sum", 0)
             self.raw["decks"][d_id].setdefault("new_done", 0)
             self.raw["decks"][d_id].setdefault("config_id", deck_info['conf'])
             self.raw["decks"][d_id].setdefault("status", "-")
-            self.raw["decks"][d_id].setdefault("todays_nlry_sum", 0)
-            self.raw["decks"][d_id].setdefault("todays_nlry_max", 0)
+            self.raw["decks"][d_id].setdefault("todays_workload", 0)
+            self.raw["decks"][d_id].setdefault("todays_max_workload", 0)
 
     def _update_decks_in_add_on_config(self):
         logger.debug("_update_decks_in_add_on_config")

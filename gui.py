@@ -91,7 +91,7 @@ class GUI:
 
     def todays_spin_update_value(self, value, spin):
         did = spin.property("did")
-        self.add_on_config.set_deck_state(did=did, key="todays_nlry_max", value=value)
+        self.add_on_config.set_deck_state(did=did, key="todays_max_workload", value=value)
 
     def get_global_settings_group_box(self):
         global_group_box = QGroupBox("GLOBAL")
@@ -118,12 +118,11 @@ class GUI:
         #
         col_name: TableColumnText = TableColumnText(0, "NAME")
         col_enabled: TableColumnCheckBox = TableColumnCheckBox(1, "ENABLED", self.add_on_config)
-        col_today_nlry: TableColumnText = TableColumnText(2, "TODAY'S\nNLRY")
-        col_today_nlry_max: TableColumnSpinBox = TableColumnSpinBox(3, "TODAY'S\nNLRY MAX")
-        col_all_nlry: TableColumnText = TableColumnText(4, "ALL\nNLRY")
-        col_new_done: TableColumnText = TableColumnText(5, "NEW\nDONE")
-        col_status: TableColumnText = TableColumnText(6, "STATUS")
-        col_last_100: TableColumnText = TableColumnText(7, "LAST 100")
+        col_today_workload: TableColumnText = TableColumnText(2, "TODAY'S\nWORKLOAD")
+        col_today_max_workload: TableColumnSpinBox = TableColumnSpinBox(3, "TODAY'S MAX\nWORKLOAD")
+        col_new_done: TableColumnText = TableColumnText(4, "NEW\nDONE")
+        col_status: TableColumnText = TableColumnText(5, "STATUS")
+        col_last_100: TableColumnText = TableColumnText(6, "LAST 100")
         #
         # Add GUI columns
         #
@@ -131,20 +130,17 @@ class GUI:
 
         decks_grid_layout.addWidget(col_enabled.header, 0, col_enabled.cid,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(col_today_nlry.header, 0, col_today_nlry.cid,
+        decks_grid_layout.addWidget(col_today_workload.header, 0, col_today_workload.cid,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(col_today_nlry_max.header, 0, col_today_nlry_max.cid,
-                                    alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(col_all_nlry.header, 0, col_all_nlry.cid,
+        decks_grid_layout.addWidget(col_today_max_workload.header, 0, col_today_max_workload.cid,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(col_new_done.header, 0, col_new_done.cid, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(col_status.header, 0, col_status.cid, alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(col_last_100.header, 0, col_last_100.cid, alignment=Qt.AlignmentFlag.AlignCenter)
 
         row = 1
-        all_nlry_count = 0
-        today_nlry_sum = 0
-        today_nlry_max_sum = 0
+        todays_workload_sum = 0
+        todays_max_workload_sum = 0
         all_new_done = 0
         for did in self.add_on_config.get_decks_ids():
             ####################################################################################################
@@ -174,26 +170,21 @@ class GUI:
                 row += 1
                 continue
             ####################################################################################################
-            today_nlry = self.add_on_config.get_deck_state(did=did, key="todays_nlry_sum")
-            today_nlry_sum += int(today_nlry)
-            decks_grid_layout.addWidget(col_today_nlry.get_widget(today_nlry), row, col_today_nlry.cid,
+            today_workload = self.add_on_config.get_deck_state(did=did, key="todays_workload")
+            todays_workload_sum += int(today_workload)
+            decks_grid_layout.addWidget(col_today_workload.get_widget(today_workload), row, col_today_workload.cid,
                                         alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
-            todays_nlry_max = self.add_on_config.get_deck_state(did=did, key="todays_nlry_max")
-            today_nlry_max_sum += int(todays_nlry_max)
-            todays_nlry_max_spin = QSpinBox()
-            todays_nlry_max_spin.setRange(0, 1000)
-            todays_nlry_max_spin.setValue(int(todays_nlry_max))
-            todays_nlry_max_spin.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            todays_nlry_max_spin.setProperty("did", did)
-            todays_nlry_max_spin.valueChanged.connect(
-                lambda value, spin=todays_nlry_max_spin: self.todays_spin_update_value(value, spin))
-            decks_grid_layout.addWidget(todays_nlry_max_spin, row, col_today_nlry_max.cid,
-                                        alignment=Qt.AlignmentFlag.AlignCenter)
-            ####################################################################################################
-            nlry_sum = self.add_on_config.get_deck_state(did=did, key="nlry_sum")
-            all_nlry_count += int(nlry_sum)
-            decks_grid_layout.addWidget(col_all_nlry.get_widget(nlry_sum), row, col_all_nlry.cid,
+            todays_max_workload = self.add_on_config.get_deck_state(did=did, key="todays_max_workload")
+            todays_max_workload_sum += int(todays_max_workload)
+            todays_max_workload_spin = QSpinBox()
+            todays_max_workload_spin.setRange(0, 1000)
+            todays_max_workload_spin.setValue(int(todays_max_workload))
+            todays_max_workload_spin.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            todays_max_workload_spin.setProperty("did", did)
+            todays_max_workload_spin.valueChanged.connect(
+                lambda value, spin=todays_max_workload_spin: self.todays_spin_update_value(value, spin))
+            decks_grid_layout.addWidget(todays_max_workload_spin, row, col_today_max_workload.cid,
                                         alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             new_done_count = self.add_on_config.get_deck_state(did=did, key="new_done")
@@ -205,22 +196,20 @@ class GUI:
             decks_grid_layout.addWidget(col_status.get_widget(status_text), row, col_status.cid,
                                         alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
-            last_100_nlry_retention_str = self.add_on_config.get_deck_state(did=did,
-                                                                            key="last_100_nlry_reviews_retention")
-            last_100_nlry_retention_per = round(float(last_100_nlry_retention_str) * 100)
-            last_100_nlry_retention = str(last_100_nlry_retention_per) + "%"
-            decks_grid_layout.addWidget(col_last_100.get_widget(last_100_nlry_retention), row, col_last_100.cid,
+            last_100_retention_str = self.add_on_config.get_deck_state(did=did,
+                                                                       key="last_100_reviews_retention")
+            last_100_retention_per = round(float(last_100_retention_str) * 100)
+            last_100_retention = str(last_100_retention_per) + "%"
+            decks_grid_layout.addWidget(col_last_100.get_widget(last_100_retention), row, col_last_100.cid,
                                         alignment=Qt.AlignmentFlag.AlignCenter)
             ####################################################################################################
             row += 1
         # ADD SUMMARY LINE #################################################################################
         decks_grid_layout.addWidget(QLabel("TOTAL"), row, col_name.cid,
                                     alignment=Qt.AlignmentFlag.AlignLeft)
-        decks_grid_layout.addWidget(QLabel(str(today_nlry_sum)), row, col_today_nlry.cid,
+        decks_grid_layout.addWidget(QLabel(str(todays_workload_sum)), row, col_today_workload.cid,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel(str(today_nlry_max_sum)), row, col_today_nlry_max.cid,
-                                    alignment=Qt.AlignmentFlag.AlignCenter)
-        decks_grid_layout.addWidget(QLabel(str(all_nlry_count)), row, col_all_nlry.cid,
+        decks_grid_layout.addWidget(QLabel(str(todays_max_workload_sum)), row, col_today_max_workload.cid,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
         decks_grid_layout.addWidget(QLabel(str(all_new_done)), row, col_new_done.cid,
                                     alignment=Qt.AlignmentFlag.AlignCenter)
