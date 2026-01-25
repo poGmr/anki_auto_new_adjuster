@@ -116,7 +116,7 @@ class Deck:
 
     def _get_cid_next_in_nearest_due(self) -> CardId | None:
         query = f'"deck:{self.name}" AND prop:due>0 AND -("is:buried" OR "is:suspended" OR rated:1)'
-        card_ids = mw.col.find_cards(query, order="due")
+        card_ids = mw.col.find_cards(query, order="ivl")
         if len(card_ids) == 0:
             logger.warning(f"[{self.name}] No cards in due>0 queue.")
             return None

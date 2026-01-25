@@ -1,0 +1,24 @@
+@startuml
+skinparam defaultFontSize 10
+
+
+[*] --> ERROR : E
+ERROR-->[*]
+[*] --> MIN_REVIEW : 0
+MIN_REVIEW-->DONE : E
+MIN_REVIEW-->WAIT : 1
+MIN_REVIEW : 1: All deck reviews for today are done.
+MIN_REVIEW : E: Exception - no new, new ahead reviews.
+WAIT-->MIN_NEW : 2
+WAIT-->MAX_NEW : 4
+WAIT-->MAX_REVIEW : 6
+WAIT: 2, 4: NEW EXIST
+WAIT: 6: AHEAD REVIEWS EXIST
+MIN_NEW-->DONE : E
+MIN_NEW-->WAIT : 3
+MIN_NEW :
+MAX_NEW-->WAIT : 5
+MAX_NEW-->DONE : E
+MAX_REVIEW-->DONE : 7
+DONE-->[*]
+@enduml
